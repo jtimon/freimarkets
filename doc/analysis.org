@@ -17,18 +17,24 @@ protocol to support this protocol.
 - *Asset*: a crypto-token type representing a certain type of
   property.
 
+
 - *Crypto-chain*: The data structure that contains the information of
   a p2p accounting network (for example, Freicoin's blockchain).
 
+
 - *Public asset*: An asset that exists in a crypto-chain.
+
 
 - *Private asset*: An asset that exists in a private server.
 
+
 - *Holder*: a user that owns certain quantity of a given asset.
+
 
 - *Issuer*: the entity responsible for a given asset. Only the
   issuer can create new units of a given asset and it is also
   responsible for the real world backing of the asset if it has any.
+
 
 - *Accountant*: a server responsible for the accounting of a given
   asset. It has to maintain a database of the balances and prevent
@@ -49,6 +55,7 @@ protocol to support this protocol.
   Advertisements can refer to two private assets or a private and a
   public one, but the asset to be received is always private.
 
+
 - *Order*: A binding offer to to exchange certain quantity
   of a public asset for another public asset at given price or rate.
   Orders can offer a private asset in exchange of a public one, but
@@ -56,12 +63,14 @@ protocol to support this protocol.
   exchange of a private one, because the crypto-chain cannot validate
   the transfer of the private asset on its own.
 
+
 - *Transitive transaction*: an atomic transaction involving more
   than two assets. This is similar to Ryan Fugger's Ripple concept.
   Transitive transactions can involve an arbitrary number of assets,
   allowing the payer to use a different currency than the one the
   recipient will receive. This allows economic agents without a
   direct trust relationship to interact with each other.
+
 
 - *Registry*: a server providing a timestamping service to ensure
   atomicity in non-trivial transactions (involving more than one
