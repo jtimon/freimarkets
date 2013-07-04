@@ -109,4 +109,38 @@ protocol to support this protocol.
 
 - **: 
 
+* Messages
 
+  The following message types define the protocol. Although this
+  document uses JSON nomenclature to define the messages, the
+  protocol itself could use another data serialization format.
+
+** Private asset definition
+
+#+BEGIN_SRC json
+"asset_definition": {
+    "issuer": "(hash of the issuer's public key)",
+    "accountant": "(optional, hash of the accountant's public key)",
+    "commit_methods": [(commit methods)],
+    "interest_rate": "(interest rate, may be negative)",
+    "interest_step": "(time in seconds)",
+    "unit": "(optional, value unit)",
+    "contract": "(optional, private contract associated with the asset)"
+}
+#+END_SRC
+
+   If the accountant field is left empty, the issuer himself
+   acts like an accountant for the asset.
+
+   Each interest_step in seconds, interest_rate is applied.
+
+   The private contract may be a legal contract or something that
+   enables more automatic features like a ricardian contract.
+
+** Advertisement
+
+
+
+* Examples
+** 
+* Sequences
