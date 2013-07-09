@@ -17,24 +17,38 @@ protocol to support this protocol.
 - *Asset*: a crypto-token type representing a certain type of
   property.
 
+- *Transitive transaction*: an atomic transaction involving more
+  than two assets. This is similar to Ryan Fugger's Ripple concept.
+  Transitive transactions can involve an arbitrary number of assets,
+  allowing the payer to use a different currency than the one the
+  recipient will receive. This allows economic agents without a
+  direct trust relationship to interact with each other.
 
-- *Crypto-chain*: The data structure that contains the information of
+- *The payer*: the initiator of a transitive transaction, no matter
+  if it is a payment or trade.
+
+- *Crypto-chain*: the data structure that contains the information of
   a p2p accounting network (for example, Freicoin's blockchain).
 
+- *Public asset*: an asset that exists in a crypto-chain.
 
-- *Public asset*: An asset that exists in a crypto-chain.
+- *Private asset*: an asset that exists in a private server.
 
-
-- *Private asset*: An asset that exists in a private server.
-
+- *Commit*: the process by which a transaction becomes irrevocably
+  valid and all the movements of asset are atomically executed. 
+  
+  The protocol must support different commit methods and be
+  extendable in that respect. The main commit methods are
+  crypto-chain commit and registry commit. All transactions involving
+  public assets have to use the crypto-chain commit method. In fact,
+  transactions involving only public assets don't need to do anything
+  special for the commit, just be valid when they get into the chain.
 
 - *Holder*: a user that owns certain quantity of a given asset.
-
 
 - *Issuer*: the entity responsible for a given asset. Only the
   issuer can create new units of a given asset and it is also
   responsible for the real world backing of the asset if it has any.
-
 
 - *Accountant*: a server responsible for the accounting of a given
   asset. It has to maintain a database of the balances and prevent
@@ -44,32 +58,83 @@ protocol to support this protocol.
   also act as its own accountant. 
 
   Since the crypto-chain does the accounting and double-spending
-  prevention on its own, for public assets the accountant is
-  optional, for example, the asset Freicoin (FRC) doesn't have any
-  accountant. The accountant of a public asset can perform other
-  functions like ensuring that the asset only goes to addresses
-  (accounts) in a set of authorized accounts defined by the issuer.
+  prevention on its own, public assets don't have any accountant.
 
-- *Advertisement*: A non-binding offer to exchange certain quantity
-  of an asset for another at given price or rate.
-  Advertisements can refer to two private assets or a private and a
-  public one, but the asset to be received is always private.
+- *Authority*: a server that verifies and signs all attempted
+  transactions, orders and promises involving a given asset. They are
+  optional for both public and private assets.
+  
+  They can limit, for example, which addresses can hold the asset to
+  a set of authorized accounts defined by the issuer or the Authority itself.
+  Certain assets need an authority to comply with money transmission
+  regulations or to enable a higher level o transparency using only
+  verified addresses that belong to known parties. They can maintain
+  a full provable log of all transactions involving the asset.
 
+  Although it would be reasonable to assume that they will be always
+  online, they can sign transactions and orders in advance, being the
+  accountant the only actor that always needs to sign at transaction
+  processing time.
 
-- *Order*: A binding offer to to exchange certain quantity
-  of a public asset for another public asset at given price or rate.
-  Orders can offer a private asset in exchange of a public one, but
-  not the other way around: an order cannot offer a public asset in
-  exchange of a private one, because the crypto-chain cannot validate
-  the transfer of the private asset on its own.
+  An issuer can act as its own Authority.
 
+- *Order*: a binding offer to to exchange certain quantity
+  of an asset for another asset at given price or rate. They're
+  signed by the holder and the authority of the asset being sold.
 
-- *Transitive transaction*: an atomic transaction involving more
-  than two assets. This is similar to Ryan Fugger's Ripple concept.
-  Transitive transactions can involve an arbitrary number of assets,
-  allowing the payer to use a different currency than the one the
-  recipient will receive. This allows economic agents without a
-  direct trust relationship to interact with each other.
+  Depending on the nature of the assets being traded, orders can be
+  public, private or mixed. Orders offering a private asset for a
+  public one are considered private, only orders that give a public
+  asset in exchange of private assets are considered mixed.
+
+  Transactions including public and/or mixed orders must be committed
+  using the crypto-chain commit method because they involve public
+  assets.
+
+- *Registry commit method*: when all assets in the transaction are
+  private, the registry commit method can be used. 
+
+  After collecting the necessary orders, the payer initiates the
+  transaction by specifying a registry (this may need previous
+  negotiation between the payer and the accountants), creating a
+  random commit secret and distributing its hash and an expiry
+  timestamp to the different accountants. The payer also sends the
+  amount to be filled from each order to the accountants, which sign
+  the orders appending the information received. Once signed by the
+  accountants, the orders constitute "promises".
+
+  Once everything is signed, the payer sends the commit secret to the
+  specified registry, which signs the secret appending a tiemstamp
+  with the current time. Anyone can query the register for a specified
+  secret hash and the register will answer the with the secret and the
+  timestamp or a message indicating that the secret has not been
+  processed yet.
+
+  The promises and the proof from the register constitute together
+  the proof of payment.
+
+- *Crypto-chain commit method*: when there's public and private assets
+  in a transaction, the chain commit method must be used. If all the
+  assets are private, a public asset can be used paying a fee to use
+  this commit method.
+
+  After collecting the necessary orders, the payer builds
+
+--------------------------
+
+- All public + chain: get into the chain valid (before all expiry's)
+- All private + registry: payer's commit secret timestamped by
+  registry before tx_expiry.
+- All private + chain: 
+  + payer's commit secret timestamped by registry before tx_expiry_block ??
+  + pub_tx's id gets into the chain (transaction has n_expiry_time. ??
+- Mixed + chain: 
+
+-----------------  
+
+  When private assets are being sold, the payer initiates the
+  transaction by creating a random secret and distributes its hash to
+  the different accountants. They sign the order with the secret hash 
 
 
 - *Registry*: a server providing a timestamping service to ensure
