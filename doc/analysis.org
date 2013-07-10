@@ -32,7 +32,10 @@ protocol to support this protocol.
 
 - *Public asset*: an asset that exists in a crypto-chain.
 
-- *Private asset*: an asset that exists in a private server.
+- *Private asset*: an asset that exists in a private server. There's
+  no technical reason why a given server couldn't publish all its
+  balances, the term is just chosen to differentiate from the assets
+  in crypto-chains that have to be necessarily public.
 
 - *Commit*: the process by which a transaction becomes irrevocably
   valid and all the movements of asset are atomically executed. 
