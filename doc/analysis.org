@@ -63,30 +63,9 @@ protocol to support this protocol.
   Since the crypto-chain does the accounting and double-spending
   prevention on its own, public assets don't have any accountant.
 
-- *Authority*: a server that verifies and signs all attempted
-  transactions, orders and promises involving a given asset. They are
-  optional for both public and private assets.
-  
-  They can limit, for example, which addresses can hold the asset to
-  a set of authorized accounts defined by the issuer or the Authority itself.
-  Certain assets need an authority to comply with money transmission
-  regulations or to enable a higher level o transparency using only
-  verified addresses that belong to known parties. They can maintain
-  a full provable log of all transactions involving the asset.
-
-  For public assets they are also necessary to enforce transfer fees
-  to the authority or the issuer.
-
-  Although it would be reasonable to assume that they will be always
-  online, they can sign transactions and orders in advance, being the
-  accountant the only actor that always needs to sign at transaction
-  processing time.
-
-  An issuer can act as its own Authority.
-
 - *Order*: a binding offer to to exchange certain quantity
   of an asset for another asset at given price or rate. They're
-  signed by the holder and the authority of the asset being sold.
+  signed by the holder of the asset being sold.
 
   Depending on the nature of the assets being traded, orders can be
   public, private or mixed. Orders offering a private asset for a
@@ -149,7 +128,7 @@ protocol to support this protocol.
 
   The promises and the proof from the register constitute together
   the proof of payment. The accountants store these proofs to give
-  them to the holders, authorities and issuers.
+  them to the holders and issuers.
 
 - *Transaction commit secret*: a new optional field for chain
   transactions. The scripts on the inputs can contain a new script
@@ -222,7 +201,6 @@ protocol to support this protocol.
 "asset_definition": {
     "issuer": "(hash of the issuer's public key)",
     "accountant": "(optional, hash of the accountant's public key)",
-    "authority": "(optional, hash of the authority's public key)",
     "interest_rate": "(interest rate, may be negative)",
     "interest_step": "(time in seconds)",
     "unit": "(optional, value unit)",
@@ -232,10 +210,6 @@ protocol to support this protocol.
 
    If the accountant field is left empty, the issuer himself
    acts like an accountant for the asset.
-
-   If the authority is left empty, it is assumed that no authority
-   validating the transfers. If the issuer wants to act as its own
-   authority he must specify his own address again in this field.
 
    Each interest_step in seconds, interest_rate is applied.
 
