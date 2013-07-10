@@ -54,8 +54,8 @@ protocol to support this protocol.
   asset. It has to maintain a database of the balances and prevent
   the double-spending of the tokens, thus its signature is required
   for every transaction involving an asset it accounts for. For this
-  reason accountants are supposed to be always online. An issuer can
-  also act as its own accountant. 
+  reason accountants are supposed to be always online. Issuers and
+  holders can run their own accounting servers.
 
   Since the crypto-chain does the accounting and double-spending
   prevention on its own, public assets don't have any accountant.
@@ -70,6 +70,9 @@ protocol to support this protocol.
   regulations or to enable a higher level o transparency using only
   verified addresses that belong to known parties. They can maintain
   a full provable log of all transactions involving the asset.
+
+  For public assets they are also necessary to enforce transfer fees
+  to the authority or the issuer.
 
   Although it would be reasonable to assume that they will be always
   online, they can sign transactions and orders in advance, being the
@@ -91,6 +94,27 @@ protocol to support this protocol.
   using the crypto-chain commit method because they involve public
   assets.
 
+- *Promise*: an asset transfer or order signed by all the necessary
+  parties. Its validity depends on the commit of the full transaction
+  by a registry or a crypto-chain.
+
+  They contain the hash of a commit secret and a commit expiry. The
+  expiry timestamp for registry commits. In the case of crypto-chain
+  commits, the public part of the transaction must contain the expiry
+  time in its own format (for example, in the case of Freicoin the
+  expiry time would be expressed as a block number).
+
+- *Registry*: a server providing a timestamping service to ensure
+  atomicity in non-trivial transactions (involving more than one
+  asset) that aren't committed using a crypto-chain. Any transaction
+  involving public assets must be committed using its crypto-chain and
+  therefore doesn't need a registry.
+
+  The registry doesn't have to know anything about the transaction
+  itself apart from the commit secret. It publishes just publishes a
+  pair with the commit secret and a timestamp. It doesn't even know
+  whether the transaction ended up being valid or it expired.
+
 - *Registry commit method*: when all assets in the transaction are
   private, the registry commit method can be used. 
 
@@ -99,68 +123,77 @@ protocol to support this protocol.
   negotiation between the payer and the accountants), creating a
   random commit secret and distributing its hash and an expiry
   timestamp to the different accountants. The payer also sends the
-  amount to be filled from each order to the accountants, which sign
-  the orders appending the information received. Once signed by the
-  accountants, the orders constitute "promises".
+  amount to be filled from each order and the destination address to
+  each accountant, which signs the order appending all the information
+  received. Once signed by the accountants, the orders constitute
+  "promises".
+
+  Note that orders can contain two assets located in different
+  accounting servers. In this case both accountants must sign a
+  promise to give it to the other one.
+  
+  The payer signs his simple payment promise first, then the receiver
+  signs her order's promise, then the next one, etc.
 
   Once everything is signed, the payer sends the commit secret to the
-  specified registry, which signs the secret appending a tiemstamp
+  specified registry, which signs the secret appending a timestamp
   with the current time. Anyone can query the register for a specified
   secret hash and the register will answer the with the secret and the
   timestamp or a message indicating that the secret has not been
-  processed yet.
+  processed yet. Note that is not enough to have the secret processed
+  by a registry, the registry's timestamp must be lower than the
+  commit expiry timestamp.
 
   The promises and the proof from the register constitute together
-  the proof of payment.
+  the proof of payment. The accountants store these proofs to give
+  them to the holders, authorities and issuers.
+
+- *Transaction commit secret*: a new optional field for chain
+  transactions. The scripts on the inputs can contain a new script
+  operator OP_SECRET_HASHES_TO <secret_hash>. If the parameter
+  <secret_hash> on any of the occurrences of this operator in the
+  transaction is not equal to the hash of this field, the transaction
+  as a whole is invalid.
+
+- *Sub-transaction*: is the data structure that represents a public
+  order. They have inputs and outputs that can be denominated in
+  different assets.
+  
+- *Private output*: it is a special type of output only allowed for
+  sub-transactions that doesn't get into the UTXO but sets more
+  conditions for the sub-transaction to be included in a valid
+  transaction. The signer of the sub-transaction fills the following
+  fields: private asset id, amount, destination address, accountant
+  address. When the payer is creating a transaction involving private
+  assets, he must connect with all the accountants specified in
+  private outputs and give them the hash of the commit secret. Each
+  accountant appends this hash to the sub-transaction as well as an
+  expiry block height and then signs it. 
 
 - *Crypto-chain commit method*: when there's public and private assets
   in a transaction, the chain commit method must be used. If all the
   assets are private, a public asset can be used paying a fee to use
   this commit method.
 
-  After collecting the necessary orders, the payer builds
+  After collecting the necessary orders, the payer initiates the
+  transaction, creating a random commit secret and distributing its
+  hash and an expiry block height to the different accountants. The
+  payer also sends the amount to be filled from each order and the
+  destination address to each accountant, which signs the order
+  appending all the information received. This is similar to the
+  registry commit process with the only difference that no registry
+  has to be specified here. Once signed by the accountants, the
+  private and mixed orders constitute "promises".
 
---------------------------
+  Here again the signing order goes from the payer to the last
+  accountant, skipping completely public orders and payments since
+  they have no accountant.
 
-- All public + chain: get into the chain valid (before all expiry's)
-- All private + registry: payer's commit secret timestamped by
-  registry before tx_expiry.
-- All private + chain: 
-  + payer's commit secret timestamped by registry before tx_expiry_block ??
-  + pub_tx's id gets into the chain (transaction has n_expiry_time. ??
-- Mixed + chain: 
-
------------------  
-
-  When private assets are being sold, the payer initiates the
-  transaction by creating a random secret and distributes its hash to
-  the different accountants. They sign the order with the secret hash 
-
-
-- *Registry*: a server providing a timestamping service to ensure
-  atomicity in non-trivial transactions (involving more than one
-  asset) that aren't committed using a crypto-chain. Any transaction
-  involving public assets must be committed using its crypto-chain
-  and therefore doesn't need a registry.
-
-  The registry doesn't have to know anything about the transaction
-  itself apart the commit secret, the commit secret hash and the
-  timestamp. It publishes tuples with these three elements. It doesn't
-  even know if the transaction was valid or it expired.
-
-- *Promise*: A signed sub-transaction which validity depends on the
-  commit of the full transaction by a registry or a crypto-chain.
-  They contain the hash of a commit secret in the case of purely
-  private transactions which are to be committed by a registry. If
-  the transaction is partially public, they contain a hash of the
-  full public transaction (before signatures are added) instead of
-  the commit secret.
-
-  They must contain an expiry timestamp for registry commits. In the
-  case of crypto-chain commits, the public part of the transaction
-  must contain the expiry time in its own format (for example, in the
-  case of Freicoin the expiry time would be expressed as a block
-  number).
+  Once everything is signed, the payer completes the public
+  transaction with the commit secret and broadcasts it to the
+  crypto-chain network. If the transaction gets into the chain (it has
+  to be before the commit expiry), all promises are valid, otherwise
+  all are considered canceled.
 
 - **: 
 
@@ -186,7 +219,7 @@ protocol to support this protocol.
 "asset_definition": {
     "issuer": "(hash of the issuer's public key)",
     "accountant": "(optional, hash of the accountant's public key)",
-    "commit_methods": [(commit methods)],
+    "authority": "(optional, hash of the authority's public key)",
     "interest_rate": "(interest rate, may be negative)",
     "interest_step": "(time in seconds)",
     "unit": "(optional, value unit)",
@@ -197,14 +230,22 @@ protocol to support this protocol.
    If the accountant field is left empty, the issuer himself
    acts like an accountant for the asset.
 
+   If the authority is left empty, it is assumed that no authority
+   validating the transfers. If the issuer wants to act as its own
+   authority he must specify his own address again in this field.
+
    Each interest_step in seconds, interest_rate is applied.
 
    The private contract may be a legal contract or something that
    enables more automatic features like a ricardian contract.
 
-** Advertisement
+** Order
 
+** Trade promise
 
+** Transfer promise
+
+** 
 
 * Examples
 ** 
