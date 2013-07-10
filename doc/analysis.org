@@ -225,5 +225,35 @@ protocol to support this protocol.
 ** 
 
 * Examples
-** 
+
+** Simple trade with a public for private order
+
+1) Bob signs and broadcast a subtransaction "I give up to 100 frc for
+   100 privateC which Carol is the accountant for" and goes off-line.
+   The sub-tx is not valid yet, it requires Carol's signature.
+
+2) Two days later, Alice says, hey, I own 50 privateC on Carol's
+   server and I want 50 of those frc. She contacts Carol referring to
+   Bob's order.
+
+   Alice sends a private promise to Carol, staying "I pay 50 privateC
+   from my account to Bob's if a transaction mathing this
+   <secret_hash> gets into the block before Exp".
+
+3) Carol's signs Bob's sub-tx AND <secret_hash> AND her signature is
+   conditional to the sub-tx getting in the chain before Exp. 
+
+4) Alice creates the public tx using Bob's now complete sub-tx,
+   including secret and broadcasts it. 
+
+5.a) If Height > Exp the transaction is invalid
+
+5.b) If the tx gets into the chain before Exp:
+  - Alice's promise is valid and Carol owns it
+  - Bob has also the private output published in the chain "... for
+    100 privateC which Carol is the accountant for" with Carol's
+    signature published in the chain.
+
+So when Bob comes back online he can know and prove what he owns.
+
 * Sequences
