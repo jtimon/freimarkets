@@ -72,7 +72,7 @@ Here we describe in non-normative prose the proposed changes. We assume technica
 ** REVIEW Private buy with public funds
 Seller constructs private order:
 
-#+BEGIN_SRC
+#+BEGIN_SRC bitcoin
 in: 100 privB
 out: 100 FRC:pubA to seller1
 validation scriptPubKey: 
@@ -89,14 +89,14 @@ Note also that he output refers to an external asset (FRC:pubA) accountantB has 
 
 The payer (who just wants 50 privB) completes the private transaction with:
 
-#+BEGIN_SRC
+#+BEGIN_SRC bitcoin
 in: -
 out: 50 privB to buyer1
 #+END_SRC
 
 The buyer also creates the public transaction:
 
-#+BEGIN_SRC
+#+BEGIN_SRC bitcoin
 in: 50 pubA
 out: 50 pubA to seller1
 expiry: 10000
@@ -104,19 +104,19 @@ expiry: 10000
 
 but doesn't sign it. It sends both complete but not signed transactions to the accountant who reads them and completes the private validation scriptPubKey with:
 
-#+BEGIN_SRC
+#+BEGIN_SRC bitcoin
 50 OP_TOALTSTACK 10000 OP_TOALTSTACK
 #+END_SRC
 
 Finally accountantB signs it all and fills the sub-tx validation scriptSig with:
 
-#+BEGIN_SRC
+#+BEGIN_SRC bitcoin
 <accountantB_sig> <accountantB_pk>
 #+END_SRC
 
 If you put the full script ordered together to validate by the script interpreter you have:
 
-#+BEGIN_SRC
+#+BEGIN_SRC bitcoin
 <accountantB_sig> <accountantB_pk>
 50 OP_TOALTSTACK 10000 OP_TOALTSTACK
 OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantB_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
@@ -131,7 +131,7 @@ Now if buyer1 signs the public transaction and it gets into the FRC chain before
 
 The seller constructs the public order:
 
-#+BEGIN_SRC
+#+BEGIN_SRC bitcoin
 in: 100 pubB
 out: 100 accountantA:privA to seller1
 validation scriptPubKey: 
@@ -142,7 +142,7 @@ and signs the partial transaction.
 
 The payer (who just wants 50 pubB) completes the public transaction with:
 
-#+BEGIN_SRC
+#+BEGIN_SRC bitcoin
 in: -
 out: 50 pubB to buyer1
 expiry: 10000
@@ -150,7 +150,7 @@ expiry: 10000
 
 The buyer also creates the private transaction:
 
-#+BEGIN_SRC
+#+BEGIN_SRC bitcoin
 in: 50 privA
 out: 50 privA to seller1
 validation scriptPubKey: 
@@ -167,16 +167,16 @@ So the payer (userA) will pay pubA and receive pubE in exchange. PrivCs and priv
 
 Opened offers:
 
-1) Fully public:
+1 ) Fully public:
 
-#+BEGIN_SRC
+#+BEGIN_SRC bitcoin bitcoin
 in: 100 pubB
 out: 100 pubA to userB
 #+END_SRC
 
-2) Private for Public:
+2 ) Private for Public:
 
-#+BEGIN_SRC
+#+BEGIN_SRC bitcoin
 in: 100 privC
 out: 100 FRC:pubB to userC
 validation scriptPubKey: 
@@ -184,9 +184,9 @@ validation scriptPubKey:
     OP_FROMALTSTACK (expiry) OP_FROMALTSTACK (amount) userC pubB FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
 #+END_SRC
 
-3) Private for private:
+3 ) Private for private:
 
-#+BEGIN_SRC
+#+BEGIN_SRC bitcoin
 in: 100 privD
 out: 100 accC:privC to userD
 validation scriptPubKey: 
@@ -194,9 +194,9 @@ validation scriptPubKey:
     OP_DUP OP_HASH160 <accountantD_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
 #+END_SRC
 
-4) Public for private:
+4 ) Public for private:
 
-#+BEGIN_SRC
+#+BEGIN_SRC bitcoin
 in: 100 pubE
 out: 100 accD:privD to userE
 validation scriptPubKey: 
@@ -205,7 +205,7 @@ validation scriptPubKey:
 
 The payer (userA) who wants to buy 50 pubE for 50 pubA builds the public transaction (pub_tx) using offers 1 and 4:
 
-#+BEGIN_SRC
+#+BEGIN_SRC bitcoin
 in:  50 pubA
 out: 50 pubB to userC
      50 pubE to userA
@@ -220,7 +220,7 @@ Two private transactions need to be created:
 
 Using offer 2, the payer also builds transaction priv_tx_1:
 
-#+BEGIN_SRC
+#+BEGIN_SRC bitcoin
 in: -
 out: 50 privC to userD
 #+END_SRC
@@ -229,7 +229,7 @@ The validation scriptPubKey for 2 must be completed pushing 50 as the amount and
 
 The other private transaction (priv_tx_2) is built using offer 3:
 
-#+BEGIN_SRC
+#+BEGIN_SRC bitcoin
 in: -
 out: 50 privD to userE
 validation scriptPubKey:
