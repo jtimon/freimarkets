@@ -102,7 +102,7 @@ validation scriptPubKey:
 in: 100 pubE
 out: 100 accD:privD to userE
 validation scriptPubKey: 
-    OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantD_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
+    OP_DUP OP_HASH160 <accountantD_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
 
 The payer (userA) who wants to buy 50 pubE for 50 pubA builds the public transaction (pub_tx) using offers 1 and 4:
 
