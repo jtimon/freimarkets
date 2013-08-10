@@ -1,6 +1,75 @@
+#+TITLE: FreiMarkets: credit, assets, and p2p exchange
+#+AUTHOR:      
+#+EMAIL:       
+#+KEYWORDS: p2p exchange, crypto-assets, crypto-credit, smart property, colored coins, ripple, off-chain transactions, cross-chain trade
+#+LANGUAGE: en
+#+LaTeX_CLASS: article
+#+LATEX_HEADER: \usepackage[T1]{fontenc}
+#+LATEX_HEADER: \usepackage[margin=2.5cm,includefoot]{geometry}
+#+LATEX_HEADER: \usepackage{graphicx}
+#+LATEX_HEADER: \usepackage{pict2e}
+#+LATEX_HEADER: \usepackage{amsmath}
+#+LATEX_HEADER: \usepackage{chngcntr}
+#+LATEX_HEADER: \usepackage{hyperref}
+#+LATEX_HEADER: \usepackage{import}
+#+LATEX_HEADER: \hypersetup{colorlinks,citecolor=green,filecolor=black,linkcolor=blue,urlcolor=blue}
+#+OPTIONS:     toc:nil H:5
+#+BIND: org-export-latex-title-command ""
 
+#+TODO: TODO MODIFY DELETE | REVIEW DONE
+
+Adding arbitrary, user-specified bearer instruments, atomic trades and transitive transactions to Freicoin
+
+* REVIEW Introduction
+
+Herein we propose a new transaction format, nVersion=3 transactions, which enable hierarchies of independently verified sub-transactions, additional validation scripts and introspective opcodes, strict currency controls, as well as relaxation of the rules regarding coin generation via coinbase transactions for the purpose of supporting user-defined assets on the block-chain. It also introduces the concept of private centralized accounting servers to perform transactions of off-chain assets that cam interact with each other as well as with in-chain assets. Combined with suitable extensions to the peer-to-peer, JSON-RPC, RESTful, and wallet interfaces, these protocol changes complete bitcoin’s repertoire of low-level constructs, allowing the emulation of a wide variety of financial instruments.
+
+Together this enables the following sorts of applications:
+
+- Issuing new assets by means of asset definition transactions (coinbase transactions other than the usual first transaction of a block). Such assets are allowed to specify their own adjustable interest/demurrage rate, and reference an external legal contract (typically governing their redemption).
+
+- Issuing unique and indivisible assets that are transferred in sets instead of amounts and allow fast look ups on their current ownership to enhance some smart property use cases and manage some permissions of the regular custom assets.
+
+- Atomic exchange of assets of differing types through inclusion of inputs and outputs of both types in a single transaction.
+
+- Signing orders (partial-transactions giving up one asset in exchange for another) that are binding but not completed until they get into the chain as part of a balanced transaction, and have attached expiration dates or can be explicitly cancelled by double-spending the signed inputs.
+
+- Executing an arbitrary number of these orders atomically by creating a complete valid transaction where the orders are included as nested sub-transactions, thereby executing an atomic trade without requiring each of the parties to be online or in direct contact with each other. Composing orders from separate markets into an atomic trade with intermediate assets enables payments based on transitive trust relationships.
+
+- Destruction of coins or assets when no longer needed by a special class of non-spendable, prunable output script.
+
+- Restricting the conditions by which a transaction or sub-transaction may be selected for inclusion in a block by specifying validation scripts, which are run when a the enclosing block is validated.
+
+- Introspection of the block chain from within the bitcoin scripting environment through the use of new opcodes.
+
+- Running accounting servers as private chains without proof of work in which off-chain assets can be issued, transferred and traded in the same way they are in the public chain.
+
+- Execute an arbitrary number of trades from different accounting servers and/or the public chain in an atomic transaction using the public chain as the base for the secure commit.
+
+- Execute an arbitrary number of trades from different accounting servers but not assets in public chains using an agreed upon centralized timestamping server for the commit.
+
+- A chain implementing this modifications can "observe" other chain to enable secure cross-chain trade without exchanging the hash any secret. This requires the chain to validate all the observed chains in order to validate some conditional transactions.
+
+This proposal adds primitives to bitcoin necessary for implementing non-currency financial constructs, such as dividend-yielding bonds, asset ownership tokens, credit relationships, a variety of forms of smart contracts, and distributed marketplaces for exchanging all of the above.
+
+Off-chain assets provide a mechanism to support unlimited volume while being able to interact with in-chain assets in an integrated p2p market.
+
+* TODO Description
+
+Here we describe in non-normative prose the proposed changes. We assume technical familiarity with the bitcoin protocol and Freicoin’s various extensions thereof.  
+
+** Unique assets
+** Asset definition transactions
+* TODO Formal specification
+** nVersion=3 transactions
+** Sub-transactions
+** Unique assets coinbases
+** Unique assets transfers
+** Asset definition transactions
+** New scripting opcodes
+** Validation scripts
 * Example use cases and Bitcoin scripts
-** Private buy with public funds
+** REVIEW Private buy with public funds
 Seller constructs private order:
 in: 100 privB
 out: 100 FRC:pubA to seller1
@@ -44,7 +113,7 @@ Operations in the stack shouldn't be allowed in the validation scriptSig for thi
 
 Now if buyer1 signs the public transaction and it gets into the FRC chain before height 10000, the private transaction will be valid. Until that happens or height 10000 is reached the transaction is considered to be in process and after height 10000 without appearance of the public one, the private transaction is invalid. 
 
-** Buying public assets with private assets
+** REVIEW Buying public assets with private assets
 
 The seller constructs the public order:
 in: 100 pubB
@@ -69,7 +138,7 @@ validation scriptPubKey:
 The buyer signs the private transaction and sends it with the public one to accountantA.
 The public transaction only lacks accountantA's signature to be valid. If the public transaction gets into the chain before 10000 the private one is also valid, otherwise is rolled back.
 
-** Hybrid Transitive transaction
+** REVIEW Hybrid Transitive transaction
 
 pubA -> pubB -> privC -> privD -> pubE -> userA
 So the payer (userA) will pay pubA and receive pubE in exchange. PrivCs and privDs are managed by accountants accC and accD respectively.
@@ -144,6 +213,6 @@ The payer (userA) signs the full transaction and broadcasts. If it gets into the
 
 At any point, accC, accD or even userA right before the end could stop signing and forwarding the transactions, but that would only cause all transaction to expire.
 
-** Several private assets with blockchain commit method
-** Several private assets with registry commit method
+** TODO Several private assets with blockchain commit method
+** TODO Several private assets with registry commit method
 
