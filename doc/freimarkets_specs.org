@@ -71,11 +71,14 @@ Here we describe in non-normative prose the proposed changes. We assume technica
 * Example use cases and Bitcoin scripts
 ** REVIEW Private buy with public funds
 Seller constructs private order:
+
+#+BEGIN_SRC
 in: 100 privB
 out: 100 FRC:pubA to seller1
 validation scriptPubKey: 
     OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantB_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
     OP_FROMALTSTACK (expiry) OP_FROMALTSTACK (amount) seller1 pubA FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
+#+END_SRC
 
 and signs the partial transaction. 
 
@@ -85,29 +88,40 @@ Note that there's some data being fetch from the stack, that data must be set by
 Note also that he output refers to an external asset (FRC:pubA) accountantB has no control over. It is ignored for validation purposes and is only used to specify the exchange rate. If the accountant cheats the user with the exchange rate, there will be a proof of fraud.
 
 The payer (who just wants 50 privB) completes the private transaction with:
+
+#+BEGIN_SRC
 in: -
 out: 50 privB to buyer1
+#+END_SRC
 
 The buyer also creates the public transaction:
 
+#+BEGIN_SRC
 in: 50 pubA
 out: 50 pubA to seller1
 expiry: 10000
+#+END_SRC
 
 but doesn't sign it. It sends both complete but not signed transactions to the accountant who reads them and completes the private validation scriptPubKey with:
 
+#+BEGIN_SRC
 50 OP_TOALTSTACK 10000 OP_TOALTSTACK
+#+END_SRC
 
 Finally accountantB signs it all and fills the sub-tx validation scriptSig with:
 
+#+BEGIN_SRC
 <accountantB_sig> <accountantB_pk>
+#+END_SRC
 
 If you put the full script ordered together to validate by the script interpreter you have:
 
+#+BEGIN_SRC
 <accountantB_sig> <accountantB_pk>
 50 OP_TOALTSTACK 10000 OP_TOALTSTACK
 OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantB_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
 OP_FROMALTSTACK OP_FROMALTSTACK seller1 pubA FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
+#+END_SRC
 
 Operations in the stack shouldn't be allowed in the validation scriptSig for this to be secure.
 
@@ -116,24 +130,32 @@ Now if buyer1 signs the public transaction and it gets into the FRC chain before
 ** REVIEW Buying public assets with private assets
 
 The seller constructs the public order:
+
+#+BEGIN_SRC
 in: 100 pubB
 out: 100 accountantA:privA to seller1
 validation scriptPubKey: 
     OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantA_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
+#+END_SRC
 
 and signs the partial transaction. 
 
 The payer (who just wants 50 pubB) completes the public transaction with:
+
+#+BEGIN_SRC
 in: -
 out: 50 pubB to buyer1
 expiry: 10000
+#+END_SRC
 
 The buyer also creates the private transaction:
 
+#+BEGIN_SRC
 in: 50 privA
 out: 50 privA to seller1
 validation scriptPubKey: 
     10000 50 buyer1 pubB FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
+#+END_SRC
 
 The buyer signs the private transaction and sends it with the public one to accountantA.
 The public transaction only lacks accountantA's signature to be valid. If the public transaction gets into the chain before 10000 the private one is also valid, otherwise is rolled back.
@@ -147,38 +169,48 @@ Opened offers:
 
 1) Fully public:
 
+#+BEGIN_SRC
 in: 100 pubB
 out: 100 pubA to userB
+#+END_SRC
 
 2) Private for Public:
 
+#+BEGIN_SRC
 in: 100 privC
 out: 100 FRC:pubB to userC
 validation scriptPubKey: 
     OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantC_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
     OP_FROMALTSTACK (expiry) OP_FROMALTSTACK (amount) userC pubB FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
+#+END_SRC
 
 3) Private for private:
 
+#+BEGIN_SRC
 in: 100 privD
 out: 100 accC:privC to userD
 validation scriptPubKey: 
     OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantC_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
     OP_DUP OP_HASH160 <accountantD_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
+#+END_SRC
 
 4) Public for private:
 
+#+BEGIN_SRC
 in: 100 pubE
 out: 100 accD:privD to userE
 validation scriptPubKey: 
     OP_DUP OP_HASH160 <accountantD_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
+#+END_SRC
 
 The payer (userA) who wants to buy 50 pubE for 50 pubA builds the public transaction (pub_tx) using offers 1 and 4:
 
+#+BEGIN_SRC
 in:  50 pubA
 out: 50 pubB to userC
      50 pubE to userA
 expiry: 10000
+#+END_SRC
 
 Since 50 pubB from offer 1 are used to pay C, 50 pubA must go to userB, and those are funded by userA in the inputs so sub-tx 1 is complete and valid.
 But offer 4 still requires accD to sign the full transaction.
@@ -187,16 +219,22 @@ UserA still hasn't provided the scriptSig to access those 50 pubA in the inputs 
 Two private transactions need to be created:
 
 Using offer 2, the payer also builds transaction priv_tx_1:
+
+#+BEGIN_SRC
 in: -
 out: 50 privC to userD
+#+END_SRC
 
 The validation scriptPubKey for 2 must be completed pushing 50 as the amount and 10000 as the expiry into the stack. The validity of offer 2 and thus this whole transaction still depends on accC's signature.
 
 The other private transaction (priv_tx_2) is built using offer 3:
+
+#+BEGIN_SRC
 in: -
 out: 50 privD to userE
 validation scriptPubKey:
     10000 50 userC pubB FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
+#+END_SRC
 
 Offer 3 doesn't require any completion for its validation scriptPubKey, but the corresponding scriptSig requires the signatures of both accC and accD.
 
