@@ -1,6 +1,6 @@
 #+TITLE: FreiMarkets: credit, assets, and p2p exchange
-#+AUTHOR:      
-#+EMAIL:       
+#+AUTHOR:
+#+EMAIL:
 #+KEYWORDS: p2p exchange, crypto-assets, crypto-credit, smart property, colored coins, ripple, off-chain transactions, cross-chain trade
 #+LANGUAGE: en
 #+LaTeX_CLASS: article
@@ -52,7 +52,7 @@ Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomi
 
 * REVIEW Description
 
-  Here we describe in non-normative prose the proposed changes. We assume technical familiarity with the bitcoin protocol and Freicoin’s various extensions thereof.  
+  Here we describe in non-normative prose the proposed changes. We assume technical familiarity with the bitcoin protocol and Freicoin’s various extensions thereof.
 
 ** Unique assets
 
@@ -76,7 +76,7 @@ Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomi
 
    The level of privacy may vary from one server to another. Maybe a server publishes blocks signed by a unique under his control at periodic intervals while another only gives the user the proofs of his own balances. In that case users can not only ask accountants for their balances but for the full property chain of signatures back to issuance.
 
-   Note on asymmetry: it is possible for private transactions to be conditional on public Freicoin blockchain data, but not vice versa. 
+   Note on asymmetry: it is possible for private transactions to be conditional on public Freicoin blockchain data, but not vice versa.
 
    Public chains could support transactions conditional to data on other chains to enhance cross-chain trade, but then the observing chain's validation becomes dependent on the observed chain validation. This approach to cross-chain has been described several times and would be trivial to implement with this protocol extension.
 
@@ -95,15 +95,15 @@ indivisibles : the simplist method is for outputs to contain instead of an int64
 #+BEGIN_SRC bitcoin
 in: 100 privB
 out: 100 FRC:pubA to seller1
-validation scriptPubKey: 
+validation scriptPubKey:
     OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantB_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
     OP_FROMALTSTACK (expiry) OP_FROMALTSTACK (amount) seller1 pubA FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
 #+END_SRC
 
-   ...and signs the partial transaction. 
+   ...and signs the partial transaction.
 
-   The validation script starts with OP_DELEGATION_SEPARATOR, which is simply ignored by the script interpreter, but marks the part of the validation script that needs to be signed by the owners of the inputs in the transaction or sub-transaction, the rest 
-   
+   The validation script starts with OP_DELEGATION_SEPARATOR, which is simply ignored by the script interpreter, but marks the part of the validation script that needs to be signed by the owners of the inputs in the transaction or sub-transaction, the rest
+
    Note that there's some data being fetch from the stack, that data must be set by accountantB or the script will return false if it's not in the stack. Whoever appears in OP_CHECKSIGVERIFY_DEL (in this case accountantB) must sign the full transaction with the complete validation script that can be valid, including what's after OP_DELEGATION_SEPARATOR.
 
    Note also that he output refers to an external asset (FRC:pubA) accountantB has no control over. It is ignored for validation purposes and is only used to specify the exchange rate. If the accountant cheats the user with the exchange rate, there will be a proof of fraud.
@@ -146,7 +146,7 @@ OP_FROMALTSTACK OP_FROMALTSTACK seller1 pubA FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFOR
 
    Operations in the stack shouldn't be allowed in the validation scriptSig for this to be secure.
 
-   Now if buyer1 signs the public transaction and it gets into the FRC chain before height 10000, the private transaction will be valid. Until that happens or height 10000 is reached the transaction is considered to be in process and after height 10000 without appearance of the public one, the private transaction is invalid. 
+   Now if buyer1 signs the public transaction and it gets into the FRC chain before height 10000, the private transaction will be valid. Until that happens or height 10000 is reached the transaction is considered to be in process and after height 10000 without appearance of the public one, the private transaction is invalid.
 
 ** MODIFY Buying public assets with private assets
 
@@ -155,11 +155,11 @@ OP_FROMALTSTACK OP_FROMALTSTACK seller1 pubA FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFOR
 #+BEGIN_SRC bitcoin
 in: 100 pubB
 out: 100 accountantA:privA to seller1
-validation scriptPubKey: 
+validation scriptPubKey:
     OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantA_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
 #+END_SRC
 
-   ...and signs the partial transaction. 
+   ...and signs the partial transaction.
 
    The payer (who just wants 50 pubB) completes the public transaction with:
 
@@ -174,7 +174,7 @@ expiry: 10000
 #+BEGIN_SRC bitcoin
 in: 50 privA
 out: 50 privA to seller1
-validation scriptPubKey: 
+validation scriptPubKey:
     10000 50 buyer1 pubB FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
 #+END_SRC
 
@@ -201,7 +201,7 @@ out: 100 pubA to userB
 #+BEGIN_SRC bitcoin
 in: 100 privC
 out: 100 FRC:pubB to userC
-validation scriptPubKey: 
+validation scriptPubKey:
     OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantC_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
     OP_FROMALTSTACK (expiry) OP_FROMALTSTACK (amount) userC pubB FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
 #+END_SRC
@@ -211,7 +211,7 @@ validation scriptPubKey:
 #+BEGIN_SRC bitcoin
 in: 100 privD
 out: 100 accC:privC to userD
-validation scriptPubKey: 
+validation scriptPubKey:
     OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantC_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
     OP_DUP OP_HASH160 <accountantD_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
 #+END_SRC
@@ -221,7 +221,7 @@ validation scriptPubKey:
 #+BEGIN_SRC bitcoin
 in: 100 pubE
 out: 100 accD:privD to userE
-validation scriptPubKey: 
+validation scriptPubKey:
     OP_DUP OP_HASH160 <accountantD_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
 #+END_SRC
 
