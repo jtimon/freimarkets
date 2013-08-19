@@ -18,43 +18,37 @@
 
 #+TODO: TODO MODIFY DELETE | REVIEW DONE
 
-Adding arbitrary, user-specified bearer instruments, atomic trades and transitive transactions to Freicoin
+Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomic trades, auctions, and transitive transactions to Freicoin
 
 * REVIEW Introduction
 
-  Herein we propose a new transaction format, nVersion=3 transactions, which enable hierarchies of independently verified sub-transactions, additional validation scripts and introspective opcodes, strict currency controls, as well as relaxation of the rules regarding coin generation via coinbase transactions for the purpose of supporting user-defined assets on the block-chain. It also introduces the concept of private centralized accounting servers to perform transactions of off-chain assets that cam interact with each other as well as with in-chain assets. Combined with suitable extensions to the peer-to-peer, JSON-RPC, RESTful, and wallet interfaces, these protocol changes complete bitcoin’s repertoire of low-level constructs, allowing the emulation of a wide variety of financial instruments.
+  Herein we propose a new transaction format, nVersion=3 transactions, which enables hierarchies of independently verified sub-transactions, additional validation scripts and introspective opcodes, strict currency controls, as well as relaxation of the rules regarding coin generation via coinbase transactions for the purpose of supporting user-defined assets on the block-chain. We also introduce the concept of private centralized accounting servers to perform transactions of off-chain assets that cam interact with each other as well as with in-chain assets. Combined with suitable extensions to the peer-to-peer, JSON-RPC, RESTful, and wallet interfaces, these protocol changes complete bitcoin’s repertoire of low-level constructs, allowing the emulation of a wide variety of financial instruments.
 
   Together this enables the following sorts of applications:
 
-- Issuing new assets by means of asset definition transactions (coinbase transactions other than the usual first transaction of a block). Such assets are allowed to specify their own adjustable interest/demurrage rate, and reference an external legal contract (typically governing their redemption).
+- Issuing new assets by means of asset definition transactions (coinbase transactions other than the usual first transaction of a block). Such assets are allowed to specify their own interest/demurrage rate, unit granularity, and display scale.
 
-- Issuing unique and indivisible assets that are transferred in sets instead of amounts and allow fast look ups on their current ownership to enhance some smart property use cases and manage some permissions of the regular custom assets.
+- Issuing unique and indivisible assets that are transferred in sets instead of numeric amount, and allow fast look ups on their current ownership to enhance smart property use cases and manage some permissions of the regular custom assets.
 
 - Atomic exchange of assets of differing types through inclusion of inputs and outputs of both types in a single transaction.
 
 - Signing orders (partial-transactions giving up one asset in exchange for another) that are binding but not completed until they get into the chain as part of a balanced transaction, and have attached expiration dates or can be explicitly cancelled by double-spending the signed inputs.
 
-- Executing an arbitrary number of these orders atomically by creating a complete valid transaction where the orders are included as nested sub-transactions, thereby executing an atomic trade without requiring each of the parties to be online or in direct contact with each other. Composing orders from separate markets into an atomic trade with intermediate assets enables payments based on transitive trust relationships.
+- Executing an arbitrary number of these orders atomically by creating a complete valid transaction where the orders are included as nested sub-transactions, thereby executing an atomic trade without requiring each of the parties to be online or in direct communication with each other. Composing orders from separate markets into an atomic trade with intermediate assets enables payments based on transitive trust relationships.
 
-- Destruction of coins or assets when no longer needed by a special class of non-spendable, prunable output script.
+- Destruction of coins, tokens, or assets when no longer needed by a special class of non-spendable, prunable output script.
 
-- Restricting the conditions by which a transaction or sub-transaction may be selected for inclusion in a block by specifying validation scripts, which are run when a the enclosing block is validated.
+- Restricting the conditions by which a transaction or sub-transaction may be selected for inclusion by specifying validation scripts, which are run when the enclosing block is validated. Introspection of the block chain from within the bitcoin scripting environment is enabled by the introduction of new opcodes.
 
-- Introspection of the block chain from within the bitcoin scripting environment through the use of new opcodes.
+- Running accounting servers as private chains with centralized rather than distributed consensus, in which off-chain assets can be issued, transferred and traded in the same way they are in the public chain, with the private block chain providing an audit log.
 
-- Running accounting servers as private chains without proof of work in which off-chain assets can be issued, transferred and traded in the same way they are in the public chain.
+- Execute an arbitrary number of trades from different accounting servers and/or the public chain in an atomic transaction, using either the public chain or an agreed upon centralized timestamping service for the commit phase.
 
-- Execute an arbitrary number of trades from different accounting servers and/or the public chain in an atomic transaction using the public chain as the base for the secure commit.
+- Public chains or private accounting servers configured to “observe” other chains to enable much faster but secure cross-chain trade, compared with the existing slow, multi-phase protocols involving revelation of hashed secrets. This requires the ability to extract proofs from the observed chain in order to validate conditional transactions.
 
-- Execute an arbitrary number of trades from different accounting servers but not assets in public chains using an agreed upon centralized timestamping server for the commit.
+- Restrict the usage of a custom asset by assigning to it rotatable signing keys which that must sign all transactions involving the restricted assets prior to inclusion (support for KYC regulatory compliance).
 
-- A chain implementing this modifications can "observe" other chain to enable much faster but secure cross-chain trade without exchanging the hash any secret. This requires the chain to validate all the observed chains in order to validate some conditional transactions.
-
-- Restrict the usage of a custom asset by associating it to indivisible assets that must sign all transactions involving those assets to authorize them (support for KYC compliance).
-
-  This proposal adds primitives to bitcoin necessary for implementing non-currency financial constructs, such as dividend-yielding bonds, asset ownership tokens, credit relationships, a variety of forms of smart contracts, and distributed marketplaces for exchanging all of the above.
-
-  Off-chain assets provide a mechanism to support unlimited volume while being able to interact with in-chain assets in an integrated p2p market.
+  This proposal adds primitives to bitcoin necessary for implementing non-currency financial constructs, such as dividend-yielding bonds, asset ownership tokens, credit relationships, a variety of forms of smart contracts, and distributed marketplaces for exchanging all of the above. Private accounting servers provide a mechanism to support unlimited volume of off-chain transactions while being able to interact with in-chain assets through atomic cross-chain trade and an integrated peer-to-peer market.
 
 * REVIEW Description
 
