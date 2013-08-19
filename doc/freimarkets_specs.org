@@ -50,15 +50,15 @@ Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomi
 
 This proposal adds primitives to bitcoin necessary for implementing non-currency financial constructs, such as dividend-yielding bonds, asset ownership tokens, credit relationships, a variety of forms of smart contracts, and distributed marketplaces for exchanging all of the above. Private accounting servers provide a mechanism to support unlimited volume of off-chain transactions while being able to interact with in-chain assets through atomic cross-chain trade and an integrated peer-to-peer market.
 
-* REVIEW Description
-
-Here we describe in non-normative prose the proposed changes. We assume technical familiarity with the bitcoin protocol and Freicoin’s various extensions thereof.
-
 ** A note on units
 
 Throughout this document a couple of differing units are used for describing financial quantities on the Freicoin block chain. This unfortunate confusing situation arises from the history of representing bitcoin/freicoin amounts both in user interface and serialization formats.
 
 When talking about the host currency we speak of freicoins, with 1 freicoin (1 frc) traditionally being specified with 8 decimal places of precision. In old-style transactions the smallest non-zero representable unit of freicoins is 1 kria, with 100,000,000 kria = 1 frc. New-style transactions encode freicoin quantities as =decimal64= values, with 1 kria = 10^369, and the smallest non-zero representable unit being 10^-398 or 10^-775 frc. In either case, it is expected that the user interface will be configured to show units of freicoins, or the multiplier of the underlying asset, if specified.
+
+* REVIEW Description
+
+Here we describe in non-normative prose the proposed changes. We assume technical familiarity with the bitcoin protocol and Freicoin’s various extensions thereof.
 
 ** Unique assets
 
