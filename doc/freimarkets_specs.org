@@ -54,31 +54,47 @@ Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomi
 
   Here we describe in non-normative prose the proposed changes. We assume technical familiarity with the bitcoin protocol and Freicoin’s various extensions thereof.
 
+** A note on units
+
+   Throughout this document a couple of differing units are used for describing financial quantities on the Freicoin block chain. This unfortunate confusing situation arises from the history of representing bitcoin/freicoin amounts both in user interface and serialization formats.
+
+   When talking about the host currency we speak of freicoins, with 1 freicoin (1 frc) traditionally being specified with 8 decimal places of precision. In old-style transactions the smallest non-zero representable unit of freicoins is 1 kria, with 100,000,000 kria = 1 frc. New-style transactions encode freicoin quantities as decimal64 values, with 1 kria = 10^369, and the smallest non-zero representable unit being 10^-398 or 10^-775 frc. In either case, it is expected that the user interface will be configured to show units of freicoins, or the multiplier of the underlying asset, if specified.
+
 ** Unique assets
 
    Unique indivisible assets (or just "uniques" or "indivisibles") are good for things like physical ownership - keys to a smart car, numbered seats or membership tokens. Since they directly relate in the UTXO a given unique asset with its current ownership, it's not necessary anymore to trace the ownership back to a "genesis transaction" like you would need to do with a colored coins approach [fn:colored]. This allows smart property clients to have smaller requirements if the UTXO tree is hashed with each block [fn:utxo].
 
-** Asset definition transactions
+** Indivisible, unique tokens
 
-   Coins representing user-specified assets may be minted in special coinbase transactions apart from the usual first transaction of a block (where freicoins are currently and continue to be minted). Coins created in such generating transactions are not freicoins, but rather user-issued tokens or asset tokens which represent shares of the underlying asset type. Such tokens can be included in transactions containing regular Freicoin currency, which in this document is sometimes called the host currency.
+   Indivisible, uniquely identifiable asset tokens are useful for applications like physical ownership - keys to a smart car, numbered seats or membership tokens. Since an indivisible is contained within no more than one unspent transaction output at any given time, it’s not necessary to trace the ownership back to a “genesis transaction” as one would need to do with a colored coins approach [fn:colored]. This allows smart property clients to have smaller requirements if authenticated unspent transaction output index checkpoints are included in each block [fn:utxo].
 
-   The issuer of the new asset can define an interest/demurrage rate. The quantity issued may be fixed or he may define a list of issuance unique assets that permit their owners issue new units of the defined asset. Using uniques to manage new issuance allows the issuer to easily cycle public keys and not sign too many times with the same key, since that could be used for certain crypto attacks.
+** User-issued assets
 
-   Another thing that issuers/gateways can define is a list of authority uniques. The signature of an authority unique is required every time any funds of that asset are to be moved or created. This allows issuers/gateways to manage closed list of "authorized accounts" of registered users if their jurisdiction requires them to do so [fn:kyc] or just want to have users in a local area (local currencies). It also allows issuers to charge fees when the assets are traded or moved.
+   Divisible currency and/or tokens representing user-issued assets may be minted in special coinbase transactions separate from the usual first transaction of a block (where freicoins are currently, and continue to be minted). Coins created in such generating transactions are not freicoins, but rather user-issued asset shares which represent fungible ownership of the underlying asset type, or asset tokens identified by per-asset unique bitstrings. Such tokens can be included in transactions containing regular Freicoin currency, which in this document is sometimes called the host currency or fee currency.
 
-   The coinbase string is used to specify or update the interest/demurrage rate, the external contract hash, a varlist of issuance uniques and a varlist of authority uniques. Either one, all, or none may be specified for a given asset, and are serialized in the coinbase string.
+   The creator of the new asset can define an interest/demurrage rate. The quantity issued may be fixed or he may define a list of issuance tokens that permit their owners issue new units of the asset being defined.
 
-** Private chains
+   The creator of the asset definition transaction may also specify a list of authorizer tokens. The signature of an authorizer is required every time a transaction involves inputs or outputs of that asset. This allows issuers/gateways to manage closed list of “authorized accounts” of registered users if regulatory restrictions of their jurisdiction requires them to do so [fn:kyc] or if they desire whitelisting of participants (for example, local currencies or restricted stock sales). It also allows issuers to charge fees when the assets are traded or moved.
 
-   Private ledgers use a variant of the Freicoin/Freimarkets code base that is stripped of proof-of-work.
+   Using unique tokens to manage new issuance and authorizers allows the creator to follow his own key cycling policy or security protocols. By utilizing multisig or multiple signatures, it is possible for transactions to remain valid even across one or more key rotations.
 
-   Accountants for private ledgers are responsible for taking care of double-spending. Accountants are able to prevent transactions from going through if the owner has already obligated funds elsewhere - by keeping track of the available balance (actual balance - funds in various stages of commit). Accountants use various mechanisms for coordination among each other (register, blockchain commit, etc.)
+   These various properties of the asset, its interest/demurrage rate, unit granularity and display scale, and listings of issuer and authorizer tokens are set in the coinbase string of the asset definition transaction.
 
-   The level of privacy may vary from one server to another. Maybe a server publishes blocks signed by a unique under his control at periodic intervals while another only gives the user the proofs of his own balances. In that case users can not only ask accountants for their balances but for the full property chain of signatures back to issuance.
+** Partial transactions
 
-   Note on asymmetry: it is possible for private transactions to be conditional on public Freicoin blockchain data, but not vice versa.
+   This proposal extends the transaction format with an optionally empty nested level of sub-transactions. Sub-transactions differ from regular, top-level transactions in that their inputs and outputs are not required to balance and they have associated with them a quantity and granularity allowing for fractional redemption.
 
-   Public chains could support transactions conditional to data on other chains to enhance cross-chain trade, but then the observing chain's validation becomes dependent on the observed chain validation. This approach to cross-chain has been described several times and would be trivial to implement with this protocol extension.
+   Since validation of sub-transactions occurs separately from each other and the higher-level enclosing transaction, pre-signed, unbalanced transactions are able to act as offers on a distributed exchange: market participants sign offers adding coins of one asset type in exchange for an output of another type. These signed offers are broadcast through a side-channel and aggregated by miners. When a cross-over is detected (a bid higher than an ask), the miner combines the two pre-signed offers and claims the difference as a fee.
+
+** Private ledgers
+
+   Private accounting servers (the “accountant”) use a variant of the Freicoin/Freimarkets code base that is stripped of the distributed consensus proof-of-work mechanism. Accountants are responsible for eliminating double-spending, reserving balances for pending transfers, and authorizing transactions, sometimes conditionally on external events. Accountants are able to prevent transactions from going through if the owner has already obligated funds elsewhere, by keeping track of the available balance (actual balance minus funds in various stages of commit). Accountants use various distributed consensus mechanisms for coordinating the transaction commitment with other private accounting servers or public block chains.
+
+   The level of privacy may vary from one server to another. Server operators are allowed freedom in choosing which parts of the block chain audit log to publish, with a sensible default being the block headers and coinbase transactions, allowing for validation of authenticated inclusion and index proofs used to notify users of their wallet balance, history and current activity, but not revealing other user’s balances.
+
+   By using newly added introspective opcodes to construct scripts dependent on external chains, it is possible for private transactions to be conditional on public Freicoin blockchain data or other private accounting servers.
+
+   (Note that the opposite relation cannot apply at this time.. Public chains could support transactions conditional to data on other chains to enhance cross-chain trade, but then the observing chain’s validation becomes dependent on the observed chain validation. This approach to cross-chain has been described several times elsewhere, and would be trivial to implement with this protocol extension.)
 
 * TODO Formal specification
 ** nVersion=3 transactions
