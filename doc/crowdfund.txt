@@ -12,15 +12,15 @@ proposal below, plus a short listing of near-term uses, and a few
 example applications.
 
 The protocol will be deployed to the Freicoin block chain, which will
-be SHA256 merged mined against bitcoin, as demurrage prevents
-competition with bitcoin's store-of-value, the proposal builds on the
-interest and reference-height features already present in Freicoin,
-and that community has already reached consensus in favor of the
-proposal. The situation is ideal for bitcoin as gateways and bridges
-allow people to transact in bitcoins or the currency of their choice
-without clogging the bitcoin block chain, and the proposal will be
-developed as a set of neutral patches which may be applied to any
-bitcoin-derived coin or private accounting server.
+be merged mined against bitcoin. Demurrage prevents competition with
+bitcoin's store-of-value, the proposal builds on the interest and
+reference-height features already present in Freicoin, and that
+community has already reached consensus in favor of the proposal. The
+situation is ideal for bitcoin as gateways and bridges allow people to
+transact in bitcoins or the currency of their choice without clogging
+the bitcoin block chain, and the proposal will be developed as a set
+of neutral patches which may be applied to any bitcoin-derived coin or
+private accounting server.
 
 We are seeking 1,250btc to make it happen. This will pay all of our
 project and living expenses for the approximately 2 developer-years it
