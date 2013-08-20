@@ -354,8 +354,27 @@ identified authorizing token.
 
 ** TODO New scripting opcodes
 
-*** TODO =BLOCK_TIME= and =BLOCK_HEIGHT=
-*** TODO =DELEGATION_SEPARATOR=
+Several new scripting language opcodes are added by this proposal.
+Their behavior are detailed here.
+
+*** =BLOCK_HEIGHT= and =BLOCK_TIME=
+
+These opcodes push the height of the block containing the current
+frame, or its =nTime= value onto the stack.
+
+*** =DELEGATION_SEPARATOR=
+
+The =DELEGATION_SEPARATOR= opcode is a =NOP= during execution, but
+does affect signature operations. During signature hash serialization
+for any script /except/ the one being executed, all code prior to and
+including the =DELEGATION_SEPARATOR= is omitted.
+
+*** =QUANTITY=
+
+The new =QUANTITY= opcode pushes the =nQuantity= value of the current
+frame onto the stack, or 1 if the current frame is a block-level
+transaction.
+
 *** TODO =OUT_EXISTS=
 *** TODO =OUT_SPENT=
 
