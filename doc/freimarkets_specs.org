@@ -372,7 +372,7 @@ block.
 See [[https://en.bitcoin.it/wiki/Protocol_specification#tx][=nLockTime=]] in Bitcoin's protocol specification for more details.
 
 * Formal specification
-** ~nVersion=3~ transactions
+** nVersion=3 transactions
 
 This specification defines a new standard bitcoin transaction type,
 ~nVersion=3~ transactions (~nVersion=2~ being Freicoin's
