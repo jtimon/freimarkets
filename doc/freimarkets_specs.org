@@ -557,8 +557,9 @@ from ordinary transaction types:
   must be script-parseable and meet other criteria specified below.
 
 - The coinbase string contains the asset’s interest/demurrage rate,
-  unit granularity, and display scale. These values are =decimal64=,
-  =decimal64=, and signed integer, respectfully.
+  unit granularity, display scale and external contract hash. These
+  values are =decimal64=, =decimal64=, signed integer and a 20-byte
+  serialized hash (~ripemd160 . sha256~) respectively.
 
 - Other inputs besides the nullary input are allowed.
 
