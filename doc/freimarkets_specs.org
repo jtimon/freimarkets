@@ -74,7 +74,7 @@ Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomi
 
    Using unique tokens to manage new issuance and authorizers allows the creator to follow his own key cycling policy or security protocols. By utilizing multisig or multiple signatures, it is possible for transactions to remain valid even across one or more key rotations.
 
-   These various properties of the asset, its interest/demurrage rate, unit granularity and display scale, and listings of issuer and authorizer tokens are set in the coinbase string of the asset definition transaction.
+   These various properties of the asset, its interest/demurrage rate, unit granularity and display scale, the external contract and listings of issuer and authorizer tokens are set in the coinbase string of the asset definition transaction.
 
 ** Partial transactions
 
