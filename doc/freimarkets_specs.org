@@ -178,7 +178,7 @@ This specification defines a new standard bitcoin transaction type, ~nVersion=3~
 
 - An optionally empty sorted-list mapping of ~<assetid:token, scriptSig>~ signatories is added immediately following =vout=.
 
-- A new script field, =scriptValidator=, is added following the signatories’ list.
+- A new script field, split into two fields =scriptValidPubKey= and =scriptValidSig=, is added following the signatories’ list.
 
 - A new 32-bit block-time field, =nExpireTime=, is added immediately following =nLockTime=.
 
@@ -249,7 +249,6 @@ Here are the ways in which an asset definition transactions differ from ordinary
 The coinbase transaction creating an asset is the asset definition genesis transaction. Such a transaction has a single nullary input (thereby marking it as a coinbase), and zero or more ordinary inputs containing freicoins or other asset tokens of any type, typically used to supply a fee [fn:coinbase]. The output vector may contain ordinary outputs, as well as any number of coinbase extension outputs which are marked by an all-zero asset tag.
 
 ** TODO New scripting opcodes
-
 ** nVersion=3 transactions
 ** Unique asset definitions and transfers
 indivisibles : the simplist method is for outputs to contain instead of an int64 nValue, a decimal64 nValue + varlist(uniques)
