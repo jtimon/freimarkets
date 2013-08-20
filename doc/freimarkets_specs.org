@@ -192,7 +192,7 @@ The following modifications are made to the validation rules for nVersion=3 tran
 
 4. Each asset tag must reference an asset that still has unspent, unpruned transaction outputs. (Coins may be destroyed by sending them to the category of prunable, unspendable scriptPubKey’s prefixed by OP_RETURN, and if all outputs are so defined the asset itself is considered destroyed.)
 
-5. Each signature in the signatories mapping must reference an existing unique, execute correctly, and finish execution with a non-zero value as the top item on the stack or else the transaction does not validate.
+5. Each signature in the signatories mapping must reference an existing token, execute correctly, and finish execution with a non-zero value as the top item on the stack or else the transaction does not validate.
 
 6. Sub-transaction aggregate input and output balances are calculated at the sub-transaction’s reference-height, and then time-adjusted to the enclosing transaction’s reference-height, before being summed together as contributors to that transaction’s aggregate balance.
 
