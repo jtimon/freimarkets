@@ -124,9 +124,9 @@ of precision. In old-style transactions the smallest non-zero
 representable unit of freicoins is 1 kria, with 100,000,000 kria = 1
 frc. New-style transactions encode freicoin quantities as =decimal64=
 values, with 1 kria = 10^369, and the smallest non-zero representable
-unit being 10^-398 or 10^-775 frc. In either case, it is expected that
-the user interface will be configured to show units of freicoins, or
-the multiplier of the underlying asset, if specified.
+unit being 10^{-398} or 10^{-775} frc. In either case, it is expected
+that the user interface will be configured to show units of freicoins,
+or the multiplier of the underlying asset, if specified.
 
 * Major features
 
