@@ -90,7 +90,7 @@ The level of privacy may vary from one server to another. Server operators are a
 
 By using newly added introspective opcodes to construct scripts dependent on external chains, it is possible for private transactions to be conditional on public Freicoin blockchain data or other private accounting servers.
 
-(Note that the opposite relation cannot apply at this time.. Public chains could support transactions conditional to data on other chains to enhance cross-chain trade, but then the observing chain’s validation becomes dependent on the observed chain validation. This approach to cross-chain has been described several times elsewhere, and would be trivial to implement with this protocol extension.)
+Note that the opposite relation cannot apply at this time.. Public chains could support transactions conditional to data on other chains to enhance cross-chain trade, but then the observing chain’s validation becomes dependent on the observed chain validation. This approach to cross-chain has been described several times [fn:mdc], and would be trivial to implement with this protocol extension.
 
 * Proposed changes
 
@@ -448,5 +448,9 @@ validation scriptPubKey:
 [fn:utxo] Having a fast access UTXO tree indexed in each block would enhance light clients security and it is also important for scalability, something important for this proposal since it enables new uses and a bigger volume is to be expected. Mark Friedenbach's work on these improvements is documented here: http://utxo.tumblr.com/
 
 [fn:kyc] Issuers of currencies convertible to fiat may have to comply with know your customer regulations in their jurisdiction for Ant-Money laundering enforcement. For example, usd gateways based on the US need to comply with [[http://fincen.gov/statutes_regs/guidance/html/FIN-2013-G001.html][FinCEN's normative]].
+
+[fn:mdc] https://bitcointalk.org/index.php?topic=31643.0
+  https://bitcointalk.org/index.php?topic=91843.0
+  https://en.bitcoin.it/wiki/Atomic_cross-chain_trading 
 
 [fn:coinbase] This is in contrast to regular coinbase transactions which do not currently allow extra inputs.
