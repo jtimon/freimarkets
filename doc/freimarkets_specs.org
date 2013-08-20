@@ -202,7 +202,7 @@ the two pre-signed offers and claims the difference as a fee.
 
 ** Private ledgers
 
-Private accounting servers (the “accountant”) use a variant of the
+Private accounting servers, or “accountants” use a variant of the
 Freicoin/Freimarkets code base that is stripped of the distributed
 consensus proof-of-work mechanism. Accountants are responsible for
 eliminating double-spending, reserving balances for pending transfers,
