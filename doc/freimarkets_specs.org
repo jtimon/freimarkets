@@ -354,14 +354,10 @@ identified authorizing token.
 
 ** TODO New scripting opcodes
 
-*** TODO DELEGATION_SEPARATOR
-
-*** TODO OUT_EXISTS
-
-*** TODO OUT_SPENT
-
-*** TODO BLOCK_TIME and BLOCK_HEIGHT
-
+*** TODO =DELEGATION_SEPARATOR=
+*** TODO =OUT_EXISTS=
+*** TODO =OUT_SPENT=
+*** TODO =BLOCK_TIME= and =BLOCK_HEIGHT=
 ** Transaction expiration
 
 =nExpireTime= works in a very similar way than =nLockTime=, mandating
