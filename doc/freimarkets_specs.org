@@ -166,7 +166,7 @@ New-style transactions have a sorted list of ~<assetid:token, scriptSig>~ signat
 
 * Formal specification
 
-** nVersion=3 transactions
+** ~nVersion=3~ transactions
 
 This specification defines a new standard bitcoin transaction type, ~nVersion=3~ transactions (~nVersion=2~ being Freicoin's reference-height transactions, which this specification extends). ~nVersion=3~ transactions differ syntactically from ~nVersion=2~ transactions in the following ways:
 
