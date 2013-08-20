@@ -220,7 +220,7 @@ chain audit log to publish, with a sensible default being the block
 headers and coinbase transactions, allowing for validation of
 authenticated inclusion and index proofs used to notify users of their
 wallet balance, history and current activity, but not revealing other
-user’s balances.
+user’s balances or transaction history.
 
 By using newly added introspective opcodes to construct scripts
 dependent on external chains, it is possible for private transactions
