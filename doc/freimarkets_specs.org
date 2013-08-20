@@ -543,13 +543,6 @@ to supply a fee [fn:coinbase]. The output vector may contain ordinary
 outputs, as well as any number of coinbase extension outputs which are
 marked by an all-zero asset tag.
 
-** TODO New scripting opcodes
-** nVersion=3 transactions
-** Unique asset definitions and transfers
-indivisibles : the simplist method is for outputs to contain instead of an int64 nValue, a decimal64 nValue + varlist(uniques)
-** Asset definition transactions
-** Sub-transactions
-** Validation scripts
 * Example use cases and Bitcoin scripts
 ** MODIFY Private buy with public funds
    Seller constructs private order:
