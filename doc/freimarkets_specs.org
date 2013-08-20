@@ -176,7 +176,7 @@ This specification defines a new standard bitcoin transaction type, ~nVersion=3~
 
 - Outputs are suffixed with an optionally empty, sorted list of unique token bitstrings.
 
-- A sorted-list mapping of ~<assetid:token, scriptSig>~ signatories is added immediately following =vout=.
+- An optionally empty sorted-list mapping of ~<assetid:token, scriptSig>~ signatories is added immediately following =vout=.
 
 - A new script field, =scriptValidator=, is added following the signatories’ list.
 
