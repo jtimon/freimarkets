@@ -56,9 +56,13 @@ Throughout this document a couple of differing units are used for describing fin
 
 When talking about the host currency we speak of freicoins, with 1 freicoin (1 frc) traditionally being specified with 8 decimal places of precision. In old-style transactions the smallest non-zero representable unit of freicoins is 1 kria, with 100,000,000 kria = 1 frc. New-style transactions encode freicoin quantities as =decimal64= values, with 1 kria = 10^369, and the smallest non-zero representable unit being 10^-398 or 10^-775 frc. In either case, it is expected that the user interface will be configured to show units of freicoins, or the multiplier of the underlying asset, if specified.
 
-* Description
+* Major features
 
 Here we describe in non-normative prose the proposed changes. We assume technical familiarity with the bitcoin protocol and Freicoin’s various extensions thereof.
+
+** Unique assets
+
+Unique indivisible assets (or just "uniques" or "indivisibles") are good for things like physical ownership - keys to a smart car, numbered seats or membership tokens. Since they directly relate in the UTXO a given unique asset with its current ownership, it's not necessary anymore to trace the ownership back to a "genesis transaction" like you would need to do with a colored coins approach [fn:colored]. This allows smart property clients to have smaller requirements if the UTXO tree is hashed with each block [fn:utxo].
 
 ** Indivisible, unique tokens
 
@@ -90,17 +94,170 @@ The level of privacy may vary from one server to another. Server operators are a
 
 By using newly added introspective opcodes to construct scripts dependent on external chains, it is possible for private transactions to be conditional on public Freicoin blockchain data or other private accounting servers.
 
-Note that the opposite relation cannot apply at this time.. Public chains could support transactions conditional to data on other chains to enhance cross-chain trade, but then the observing chain’s validation becomes dependent on the observed chain validation and more sensitive to reorgs. This approach to cross-chain has been described several times [fn:mdc], and would be trivial to implement with this protocol extension.
+(Note that the opposite relation cannot apply at this time.. Public chains could support transactions conditional to data on other chains to enhance cross-chain trade, but then the observing chain’s validation becomes dependent on the observed chain validation. This approach to cross-chain has been described several times elsewhere, and would be trivial to implement with this protocol extension.)
 
-* TODO Formal specification
+* Proposed changes
+
+** Unlimited-precision fractional arithmetic
+
+All internal computation of accounting quantities are performed using arbitrary precision fractions, or an equivalent mathematical system which does not suffer from loss of precision or over/underflow.
+
+*** MAX_MONEY / MoneyRange limitation
+
+The maximum numerical value allowed for any output or stored intermediary value of any asset type is 2^53 - 1 kria, or 9.007199254740991 x 10^384. This is about 10% less than the maximum value representable in the =decimal64= type. A transaction which violates this constraint is invalid.
+
+** IEEE 754-2008 decimal floating point
+
+Output amounts for ~nVersion=3~ transactions are positive, real decimal floating point values using a stricter subset of the binary integer decimal encoding specified by IEEE 754-2008. Infinities and not-a-numbers are not allowed, and the normal (lowest exponent) representation must be used. For ~nVersion=1~ and ~nVersion=2~ transactions, the =int64= =nValue= field is interpreted according to the following equation:
+
+    nValue :: int64
+    dValue :: decimal64
+    dValue = nValue * 10369
+
+That is to say, an old-style minimum representable positive value of 1 kria (0.00000001 freicoins) would be encoded as a new-style =decimal64= value of 10^369. Since the smallest representable positive =decimal64= value is 10^-398, that gives an expressive range of approximately 768 orders of magnitude in the exponent, plus sixteen digits of precision. While not technically providing infinite divisibility, there is plenty of room at the bottom.
+
+** Indivisible tokens
+
+New-style outputs contain the =decimal64= continuous value combined with a possibly empty list of bitstrings. These bitstrings are indivisible, unique outputs. Any output unique must be found in an input of the enclosing transaction, and uniques cannot be shared among two outputs of the same transaction.
+
+The asset definition transaction, or any transaction with one or more of an assets’ issuers as signatory is allowed to violate the constraint that continuous outputs are less than or equal to inputs, and that output uniques are a subset of inputs for that asset.
+
+** Asset tags
+
+New-style outputs are tagged with a 160 bits identifying the asset from which the output is drawn. This tag is the 20-byte serialized hash (~ripemd160 . sha256~) of the asset definition transaction. For outputs of the host currency Freicoin, the similarly-calculated 20-byte hash of the genesis block is used instead.
+
+** Granular outputs
+
+The granularity option of the asset definition determines the minimum increment which may be used to transfer an otherwise continuous value. It is represented as a positive =decimal64= value. If left unspecified, an asset is limited at this time to the minimum encodable positive =decimal64= value (10^-398), but with further subdivision allowed if future extensions enable it. The host currency Freicoin is defined to be maximally divisible in this way. For assets with non-zero interest/demurrage, granularity checks are made at the reference-height of the transaction.
+
+** Granular redemption
+
+In general, outputs are considered spent only when the full amount has been claimed. If a later transaction claims less than the full amount, that amount is subtracted from the remaining balance.
+
+A transaction may claim less than the full amount by utilizing a granular offer. The signed offer contains a 64-bit integer field =nGranularity= which specifies the number of equal-sized units the offer is split into, and any transaction making use of the offer may choose the number of units to use, so long as there remains sufficient output remaining.
+
+In order to implement this functionality, the set of unspent transaction outputs must include a field recording the amount remaining (or equivalently, the amount spent so far).
+
+Fractional redemption of outputs containing uniques is not allowed.
+
+** Validation scripts
+
+New-style transactions have a validation script, split into the two fields =scriptValidPubKey= and =scriptValidSig=, which when combined and executed must run without abnormal termination, and return a non-zero value on the stack for a transaction to be valid.
+
+While performing signature operations in any other script, the =scriptValidSig= is set to the empty script before performing hash serialization and the =scriptValidPubKey= is stripped of any code prior to (and including) the last =DELEGATION_SEPARATOR=, if one exists.
+
+As a special case, an empty =scriptValidPubKey= and =scriptValidSig= automatically passes, and for an old-style ~nVersion=1~ or ~nVersion=2~ transaction, the empty script is the value of these fields.
+
+** Authorizing signatories
+
+New-style transactions have a sorted list of ~<assetid:bitstring, scriptSig>~ signatories. The =assetid= is the 20-byte asset tag, with bitstring taking the remaining bytes. The =scriptPubKey= is retrieved from the unspent transaction output containing the identified unique.
+
+** TODO New scripting opcodes
+
+*** TODO DELEGATION_SEPARATOR
+
+*** TODO OUT_EXISTS
+
+*** TODO OUT_SPENT
+
+*** TODO BLOCK_TIME and BLOCK_HEIGHT
+
+** TODO Transaction expiration
+
+=nExpireTime=
+
+* Formal specification
+
 ** nVersion=3 transactions
 
+This specification defines a new standard bitcoin transaction type, ~nVersion=3~ transactions (~nVersion=2~ being Freicoin's reference-height transactions, which this specification extends). ~nVersion=3~ transactions differ syntactically from ~nVersion=2~ transactions in the following ways:
+
+- A possibly-empty sub-transaction list precedes the input list.
+
+- Outputs are prefixed with an asset identifier tag, a 20-byte serialized hash (~ripemd160 . sha256~) of the coinbase transaction from which the output's coins are derived. Each output contains coins and/or tokens from a single asset/currency. For the host currency Freicoin, the similarly-calculated 20-byte hash of the entire chain's genesis block is used instead; within an asset definition transaction, the asset being defined is identified with the 0 hash.
+
+- Outputs are suffixed with an optionally empty, sorted.
+
+- A sorted-list mapping of ~<assetid:unique, scriptSig>~ signatories is added immediately following =vout=.
+
+- A new script field, =scriptValidator=, is added following the signatories’ list.
+
+- A new 32-bit block-time field, =nExpireTime=, is added immediately following =nLockTime=.
+
+The following modifications are made to the validation rules for nVersion=3 transactions:
+
+1. If a sub-transaction list is present, each nested sub-transaction must independently validate, according to the rules for sub-transaction validation.
+
+2. For each signatory, the associated =scriptSig= must be a valid signature of the enclosing transaction (with the other signatories removed), using the scriptPubKey associated with the current output containing the identified unique.
+
+3. The scriptValidator execute successfully within the frame of the enclosing block and return a non-zero value on the top of the stack.
+
+4. Each asset tag must reference an asset that still has unspent, unpruned transaction outputs. (Coins may be destroyed by sending them to the category of prunable, unspendable scriptPubKey’s prefixed by OP_RETURN, and if all outputs are so defined the asset itself is considered destroyed.)
+
+5. Each signature in the signatories mapping must reference an existing unique, execute correctly, and finish execution with a non-zero value as the top item on the stack or else the transaction does not validate.
+
+6. Sub-transaction aggregate input and output balances are calculated at the sub-transaction’s reference-height, and then time-adjusted to the enclosing transaction’s reference-height, before being summed together as contributors to that transaction’s aggregate balance.
+
+7. For a block-level, non-coinbase transaction, each asset/currency must independently balance (inputs >= outputs, the difference if any left as a fee to the miner). A transaction which has a signature from a unique in the asset’s issuers list is exempted from this requirement for that particular asset.
+
+8. For each asset used in the transaction, if that asset has a non-empty list of authorizers, at least one such signature must be present in the signatories mapping.
+
+9. If scriptValidator is non-empty, it is executed and its return value checked. It must finish execution with a non-zero value as the top item on the stack or else the transaction does not validate.
+
+10. The current time or block height must be less than or equal to the transaction's nExpireTime, where the single field can be interpreted as either a block number or UNIX timestamp in the same manner as nLockTime.
+
+11. For the purposes of enumeration and indexing, the inputs and the outputs of the top-level transaction are counted first, followed its sub-transactions in order. This corresponds to a depth-first, pre-order traversal of the sub-transaction tree.
+
+12. If the transaction is a coinbase but not the first transaction of a block, then extra validation rules for asset definition transactions apply.
+
+** Hierarchical sub-transactions
+
+Any nVersion=3 transaction includes an optionally empty nested level of sub-transactions, serialized in-between the nVersion and vin fields. Sub-transactions differ syntactically from regular transactions in the following ways:
+
+- Sub-transactions are prefixed by a VARINT value, nQuantity, which is required to lie within the semi-closed interval (0, nGranularity].
+
+- Sub-transactions are suffixed with a VARINT value, nGranularity, which is required to be non-zero.
+
+Sub-transactions are otherwise similar to regular top-level bitcoin transactions, but with additional verification rules:
+
+1. Null (coinbase) sub-transaction inputs are not allowed.
+
+2. Inputs and outputs do not need to balance (aggregate input may exceed output for any asset).
+
+3. The reference-height of a sub-transaction must be less than or equal to its enclosing transaction’s (and greater than or equal to each of its inputs and sub-transactions).
+
+4. During script execution, the current frame is the sub-transaction. This means that input or output indices are relative to the sub-transaction, and signature operations evaluate the hash of the sub-transaction only.
+
+** Asset definition transactions
+
+Here are the ways in which an asset definition transactions differ from ordinary transaction types:
+
+- Asset definition transactions must not be the first transaction of a block, which is reserved for the Freicoin miner coinbase.
+
+- As with the Freicoin miner coinbase, the first input of the top-level asset definition coinbase transaction must be nullary (=0= /txid/, =INT_MAX= /n/-index).
+
+- Unlike the Freicoin miner coinbase, the asset definition coinbase string (the =scriptSig= of the nullary input) is allowed to have a length within the closed interval =[0, 65535]=. However the string must be script-parseable and meet other criteria specified below.
+
+- The coinbase string may optionally contain the asset’s interest/demurrage rate, unit granularity, or display scale, overriding the default values of 0, unspecified, and +377, respectfully.
+
+- Other inputs besides the nullary input are allowed. These inputs may be any combination of ordinary and coinbase extension unspent outputs, provided that if more than one coinbase extension output is used, all must be of the same asset type.
+
+- An asset definition generating transaction may not hash (ripemd160 . sha256) to any extant asset tag unless all asset tokens for the previously defined asset have been destroyed by spending to a provably unspendable, prunable output scriptPubKey.
+
+- The 0-hash asset tag refers to the asset being defined, within the context of the asset definition transaction only.
+
+- The coinbase extension output does not require its own issuer or authorizer signatures (the issuer and authorizer lists take effect after the asset definition transaction).
+
+The coinbase transaction creating an asset is the asset definition genesis transaction. Such a transaction has a single nullary input (thereby marking it as a coinbase), and zero or more ordinary inputs containing freicoins or other asset tokens of any type, typically used to supply a fee [fn:coinbase]. The output vector may contain ordinary outputs, as well as any number of coinbase extension outputs which are marked by an all-zero asset tag.
+
+** TODO New scripting opcodes
+
+** nVersion=3 transactions
 ** Unique asset definitions and transfers
 indivisibles : the simplist method is for outputs to contain instead of an int64 nValue, a decimal64 nValue + varlist(uniques)
 ** Asset definition transactions
 ** Sub-transactions
 ** Validation scripts
-** New scripting opcodes
 * Example use cases and Bitcoin scripts
 ** MODIFY Private buy with public funds
    Seller constructs private order:
@@ -153,7 +310,7 @@ expiry: 10000
 #+BEGIN_SRC bitcoin
 <accountantB_sig> <accountantB_pk>
 50 OP_TOALTSTACK 10000 OP_TOALTSTACK
-CODE_SEPARATOR OP_DUP OP_HASH160 <accountantB_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
+OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantB_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
 OP_FROMALTSTACK OP_FROMALTSTACK seller1 pubA FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
 #+END_SRC
 
@@ -296,6 +453,4 @@ validation scriptPubKey:
 
 [fn:kyc] Issuers of currencies convertible to fiat may have to comply with know your customer regulations in their jurisdiction for Ant-Money laundering enforcement. For example, usd gateways based on the US need to comply with [[http://fincen.gov/statutes_regs/guidance/html/FIN-2013-G001.html][FinCEN's normative]].
 
-[fn:mdc] https://bitcointalk.org/index.php?topic=31643.0
-https://bitcointalk.org/index.php?topic=91843.0
-https://en.bitcoin.it/wiki/Atomic_cross-chain_trading
+[fn:coinbase] This is in contrast to regular coinbase transactions which do not currently allow extra inputs.
