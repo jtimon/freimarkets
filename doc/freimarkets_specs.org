@@ -388,6 +388,12 @@ block.
 See [[https://en.bitcoin.it/wiki/Protocol_specification#tx][nLockTime]] in Bitcoin's protocol specification for more details.
 
 * Formal specification
+
+The formal specifications assume familiarity with both the bitcoin
+protocol and various extension to it, as well as modifications made by
+Freicoin developers. This document makes reference to but does not
+specify these extensions and modifications in detail.
+
 ** nVersion=3 transactions
 
 This specification defines a new standard bitcoin transaction type,
