@@ -106,11 +106,13 @@ The maximum numerical value allowed for any output or stored intermediary value 
 
 Output amounts for ~nVersion=3~ transactions are positive, real decimal floating point values using a stricter subset of the binary integer decimal encoding specified by IEEE 754-2008. Infinities and not-a-numbers are not allowed, and the normal (lowest exponent) representation must be used. For ~nVersion=1~ and ~nVersion=2~ transactions, the =int64= =nValue= field is interpreted according to the following equation:
 
+#+BEGIN_SRC bitcoin
     nValue :: int64
     dValue :: decimal64
     dValue = nValue * 10369
+#+END_SRC
 
-That is to say, an old-style minimum representable positive value of 1 kria (0.00000001 freicoins) would be encoded as a new-style =decimal64= value of 10^369. Since the smallest representable positive =decimal64= value is 10^-398, that gives an expressive range of approximately 768 orders of magnitude in the exponent, plus sixteen digits of precision. While not technically providing infinite divisibility, there is plenty of room at the bottom.
+That is to say, an old-style minimum representable positive value of 1 kria (0.00000001 freicoins) would be encoded as a new-style =decimal64= value of 10^369. Since the smallest representable positive =decimal64= value is 10^{-398}, that gives an expressive range of approximately 768 orders of magnitude in the exponent, plus sixteen digits of precision. While not technically providing infinite divisibility, there is plenty of room at the bottom.
 
 ** Indivisible tokens
 
@@ -124,7 +126,7 @@ New-style outputs are tagged with a 160 bits identifying the asset from which th
 
 ** Granular outputs
 
-The granularity option of the asset definition determines the minimum increment which may be used to transfer an otherwise continuous value. It is represented as a positive =decimal64= value. If left unspecified, an asset is limited at this time to the minimum encodable positive =decimal64= value (10^-398), but with further subdivision allowed if future extensions enable it. The host currency Freicoin is defined to be maximally divisible in this way. For assets with non-zero interest/demurrage, granularity checks are made at the reference-height of the transaction.
+The granularity option of the asset definition determines the minimum increment which may be used to transfer an otherwise continuous value. It is represented as a positive =decimal64= value. If left unspecified, an asset is limited at this time to the minimum encodable positive =decimal64= value (10^{-398}), but with further subdivision allowed if future extensions enable it. The host currency Freicoin is defined to be maximally divisible in this way. For assets with non-zero interest/demurrage, granularity checks are made at the reference-height of the transaction.
 
 ** Granular redemption
 
@@ -262,15 +264,15 @@ indivisibles : the simplist method is for outputs to contain instead of an int64
 in: 100 privB
 out: 100 FRC:pubA to seller1
 validation scriptPubKey:
-    OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantB_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
+    DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantB_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
     OP_FROMALTSTACK (expiry) OP_FROMALTSTACK (amount) seller1 pubA FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
 #+END_SRC
 
    ...and signs the partial transaction.
 
-   The validation script starts with OP_DELEGATION_SEPARATOR, which is simply ignored by the script interpreter, but marks the part of the validation script that needs to be signed by the owners of the inputs in the transaction or sub-transaction, the rest
+   The validation script starts with =DELEGATION_SEPARATOR=, which is simply ignored by the script interpreter, but marks the part of the validation script that needs to be signed by the owners of the inputs in the transaction or sub-transaction, the rest
 
-   Note that there's some data being fetch from the stack, that data must be set by accountantB or the script will return false if it's not in the stack. Whoever appears in OP_CHECKSIGVERIFY_DEL (in this case accountantB) must sign the full transaction with the complete validation script that can be valid, including what's after OP_DELEGATION_SEPARATOR.
+   Note that there's some data being fetch from the stack, that data must be set by accountantB or the script will return false if it's not in the stack. Whoever appears in =OP_CHECKSIGVERIFY= (in this case accountantB) must sign the full transaction with the complete validation script that can be valid, including what's after =DELEGATION_SEPARATOR=.
 
    Note also that he output refers to an external asset (FRC:pubA) accountantB has no control over. It is ignored for validation purposes and is only used to specify the exchange rate. If the accountant cheats the user with the exchange rate, there will be a proof of fraud.
 
@@ -306,7 +308,7 @@ expiry: 10000
 #+BEGIN_SRC bitcoin
 <accountantB_sig> <accountantB_pk>
 50 OP_TOALTSTACK 10000 OP_TOALTSTACK
-OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantB_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
+DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantB_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
 OP_FROMALTSTACK OP_FROMALTSTACK seller1 pubA FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
 #+END_SRC
 
@@ -322,7 +324,7 @@ OP_FROMALTSTACK OP_FROMALTSTACK seller1 pubA FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFOR
 in: 100 pubB
 out: 100 accountantA:privA to seller1
 validation scriptPubKey:
-    OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantA_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
+    DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantA_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
 #+END_SRC
 
    ...and signs the partial transaction.
@@ -368,7 +370,7 @@ out: 100 pubA to userB
 in: 100 privC
 out: 100 FRC:pubB to userC
 validation scriptPubKey:
-    OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantC_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
+    DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantC_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
     OP_FROMALTSTACK (expiry) OP_FROMALTSTACK (amount) userC pubB FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
 #+END_SRC
 
@@ -378,8 +380,8 @@ validation scriptPubKey:
 in: 100 privD
 out: 100 accC:privC to userD
 validation scriptPubKey:
-    OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantC_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
-    OP_DUP OP_HASH160 <accountantD_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
+    DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantC_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
+    OP_DUP OP_HASH160 <accountantD_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
 #+END_SRC
 
    4 ) Public for private:
@@ -388,7 +390,7 @@ validation scriptPubKey:
 in: 100 pubE
 out: 100 accD:privD to userE
 validation scriptPubKey:
-    OP_DUP OP_HASH160 <accountantD_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
+    OP_DUP OP_HASH160 <accountantD_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
 #+END_SRC
 
    The payer (userA) who wants to buy 50 pubE for 50 pubA builds the public transaction (pub_tx) using offers 1 and 4:
@@ -449,8 +451,9 @@ validation scriptPubKey:
 
 [fn:kyc] Issuers of currencies convertible to fiat may have to comply with know your customer regulations in their jurisdiction for Ant-Money laundering enforcement. For example, usd gateways based on the US need to comply with [[http://fincen.gov/statutes_regs/guidance/html/FIN-2013-G001.html][FinCEN's normative]].
 
-[fn:mdc] https://bitcointalk.org/index.php?topic=31643.0
-  https://bitcointalk.org/index.php?topic=91843.0
-  https://en.bitcoin.it/wiki/Atomic_cross-chain_trading 
+[fn:mdc]   At least this two threads describe this cross-chain trade
+scheme:
+https://bitcointalk.org/index.php?topic=31643.0
+https://bitcointalk.org/index.php?topic=91843.0
 
 [fn:coinbase] This is in contrast to regular coinbase transactions which do not currently allow extra inputs.
