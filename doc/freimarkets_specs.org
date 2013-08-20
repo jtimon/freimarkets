@@ -44,7 +44,7 @@ Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomi
 
 - Execute an arbitrary number of trades from different accounting servers and/or the public chain in an atomic transaction, using either the public chain or an agreed upon centralized timestamping service for the commit phase.
 
-- Public chains or private accounting servers configured to “observe” other chains to enable much faster but secure cross-chain trade, compared with the existing slow, multi-phase protocols involving revelation of hashed secrets. This requires the ability to extract proofs from the observed chain in order to validate conditional transactions [fn:mdc].
+- Public chains or private accounting servers configured to “observe” other chains to enable much faster but secure cross-chain trade, compared with the existing slow, multi-phase protocols involving revelation of hashed secrets. This requires the ability to extract proofs from the observed chain in order to validate conditional transactions.
 
 - Restrict the usage of a custom asset by assigning to it rotatable signing keys which must sign all transactions involving the restricted assets prior to inclusion (support for KYC regulatory compliance).
 
@@ -90,10 +90,11 @@ Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomi
 
    By using newly added introspective opcodes to construct scripts dependent on external chains, it is possible for private transactions to be conditional on public Freicoin blockchain data or other private accounting servers.
 
-   (Note that the opposite relation cannot apply at this time.. Public chains could support transactions conditional to data on other chains to enhance cross-chain trade, but then the observing chain’s validation becomes dependent on the observed chain validation. This approach to cross-chain has been described several times elsewhere, and would be trivial to implement with this protocol extension.)
+   (Note that the opposite relation cannot apply at this time.. Public chains could support transactions conditional to data on other chains to enhance cross-chain trade, but then the observing chain’s validation becomes dependent on the observed chain validation and more sensible to reorgs. This approach to cross-chain has been described several times [fn:mdc], and would be trivial to implement with this protocol extension.)
 
 * TODO Formal specification
 ** nVersion=3 transactions
+
 ** Unique asset definitions and transfers
 indivisibles : the simplist method is for outputs to contain instead of an int64 nValue, a decimal64 nValue + varlist(uniques)
 ** Asset definition transactions
@@ -294,5 +295,9 @@ validation scriptPubKey:
 [fn:utxo] Having a fast access UTXO tree indexed in each block would enhance light clients security and it is also important for scalability, something important for this proposal since it enables new uses and a bigger volume is to be expected. Mark Friedenbach's work on these improvements is documented here: http://utxo.tumblr.com/
 
 [fn:kyc] Issuers of currencies convertible to fiat may have to comply with know your customer regulations in their jurisdiction for Ant-Money laundering enforcement. For example, usd gateways based on the US need to comply with [[http://fincen.gov/statutes_regs/guidance/html/FIN-2013-G001.html][FinCEN's normative]].
+
+[fn:mdc] https://bitcointalk.org/index.php?topic=31643.0
+https://bitcointalk.org/index.php?topic=91843.0
+https://en.bitcoin.it/wiki/Atomic_cross-chain_trading
 
 
