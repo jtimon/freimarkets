@@ -407,75 +407,85 @@ nVersion=3 transactions:
    must independently validate, according to the rules for
    sub-transaction validation.
 
-2. For each signatory, the associated =scriptSig= must be a valid
-   signature of the enclosing transaction (with the other signatories
-   removed), using the scriptPubKey associated with the current output
-   containing the identified unique.
-
-3. The scriptValidator execute successfully within the frame of the
-   enclosing block and return a non-zero value on the top of the
-   stack.
-
-4. Each asset tag must reference an asset that still has unspent,
-   unpruned transaction outputs. (Coins may be destroyed by sending
-   them to the category of prunable, unspendable scriptPubKey’s
-   prefixed by OP_RETURN, and if all outputs are so defined the asset
-   itself is considered destroyed.)
-
-5. Each signature in the signatories mapping must reference an
-   existing token, execute correctly, and finish execution with a
-   non-zero value as the top item on the stack or else the transaction
-   does not validate.
-
-6. Sub-transaction aggregate input and output balances are calculated
+2. Sub-transaction aggregate input and output balances are calculated
    at the sub-transaction’s reference-height, and then time-adjusted
    to the enclosing transaction’s reference-height, before being
    summed together as contributors to that transaction’s aggregate
    balance.
 
-7. For a block-level, non-coinbase transaction, each asset/currency
-   must independently balance (inputs >= outputs, the difference if
-   any left as a fee to the miner). A transaction which has a
-   signature from a unique in the asset’s issuers list is exempted
-   from this requirement for that particular asset.
+3. The asset tag of each output must reference an asset that still
+   has unspent, unpruned transaction outputs. (Coins or tokens may be
+   destroyed by sending them to the category of prunable, unspendable
+   =scriptPubKey= prefixed by =OP_RETURN=, and if all unspent outputs
+   of an asset are so constructed, the asset itself is considered
+   destroyed.)
 
-8. For each asset used in the transaction, if that asset has a
+4. For a block-level transaction, each asset/currency must
+   independently balance (input coin >= output coin, input tokens
+   equal to or a superset of output tokens; the difference if any left
+   as a fee to the miner). A transaction which has a signature from a
+   token in the asset’s issuers list is exempted from this requirement
+   for that particular asset, as are asset definition transactions for
+   asset being defined.
+
+5. Each signature in the signatories mapping must reference an
+   existing token, execute and run to completion using that token's
+   =scriptPubKey= without abnormal termination (with the other
+   signatories removed during signature operations) or else the
+   transaction does not validate. A script that does not finish
+   execution with a non-zero value on the top of the stack is not a
+   valid signature, but otherwise does not stop transaction
+   validation.
+
+   For example, if an authorizer's signature is required and only one
+   such signature is present and it terminates with zero on the top
+   of the stack, then the transaction does not validate (error:
+   missing authorizer signature). But if there are two such
+   authorizer signatures, and at least one of them passes then the
+   transaction may still validate.
+
+6. For each asset used in the transaction, if that asset has a
    non-empty list of authorizers, at least one such signature must be
    present in the signatories mapping.
 
-9. If scriptValidator is non-empty, it is executed and its return
-   value checked. It must finish execution with a non-zero value as
-   the top item on the stack or else the transaction does not
-   validate.
+7. The =scriptValidPubKey= and =scriptValidSig= of the block-level
+   transaction and each nested sub-transaction at any depth, when
+   separately combined and executed must run to completion without
+   abnormal termination, and return a non-zero value on the stack for
+   a transaction to be valid.
 
-10. The current time or block height must be less than or equal to the
-    transaction's =nExpireTime=, where the single field can be
-    interpreted as either a block number or UNIX timestamp in the same
-    manner as =nLockTime=.
+   As a special case, if both =scriptValidPubKey= and =scriptValidSig=
+   are empty, the check is skipped for that script.
 
-11. For the purposes of enumeration and indexing, the inputs and the
-    outputs of the top-level transaction are counted first, followed
-    its sub-transactions in order. This corresponds to a depth-first,
-    pre-order traversal of the sub-transaction tree.
+8. The current time or block height must be less than or equal to the
+   transaction's =nExpireTime=, where the single field can be
+   interpreted as either a block number or UNIX timestamp in the same
+   manner as =nLockTime=.
 
-12. If the transaction is a coinbase but not the first transaction of
+9. For the purposes of enumeration and indexing, the inputs and the
+   outputs of the block-level transaction are counted first, followed
+   its sub-transactions in order. This corresponds to a depth-first,
+   pre-order traversal of the sub-transaction tree.
+
+10. If the transaction is a coinbase but not the first transaction of
     a block, then extra validation rules for asset definition
     transactions apply.
 
 ** Hierarchical sub-transactions
 
 Any nVersion=3 transaction includes an optionally empty nested level
-of sub-transactions, serialized in-between the nVersion and vin
+of sub-transactions, serialized in-between the =nVersion= and =vin=
 fields. Sub-transactions differ syntactically from regular
 transactions in the following ways:
 
-- Sub-transactions are prefixed by a VARINT value, nQuantity, which is
-  required to lie within the semi-closed interval (0, nGranularity].
+- Sub-transactions are prefixed by a =VARINT= value, =nQuantity=,
+  which is required to lie within the semi-closed interval
+  =(0, nGranularity]=.
 
-- Sub-transactions are suffixed with a VARINT value, nGranularity,
+- Sub-transactions are suffixed with a =VARINT= value, =nGranularity=,
   which is required to be non-zero.
 
-Sub-transactions are otherwise similar to regular top-level bitcoin
+Sub-transactions are otherwise similar to regular block-level bitcoin
 transactions, but with additional verification rules:
 
 1. Null (coinbase) sub-transaction inputs are not allowed.
@@ -492,7 +502,19 @@ transactions, but with additional verification rules:
    sub-transaction, and signature operations evaluate the hash of the
    sub-transaction only.
 
+5. When performing signature operations within the frame of the
+   sub-transaction, =nGranularity= is included in the hash
+   serialization whereas =nQuantity= is not.
+
 ** Asset definition transactions
+
+The coinbase transaction creating an asset is the asset definition
+genesis transaction. Such a transaction has a single nullary input
+(thereby marking it as a coinbase), and zero or more ordinary inputs
+containing freicoins or other asset tokens of any type, typically used
+to supply a fee [fn:coinbase]. The output vector must include outputs
+of the newly defined asset (marked by an all-zero asset tag), or else
+the asset is immediately considered destroyed.
 
 Here are the ways in which an asset definition transactions differ
 from ordinary transaction types:
@@ -501,43 +523,32 @@ from ordinary transaction types:
   block, which is reserved for the Freicoin miner coinbase.
 
 - As with the Freicoin miner coinbase, the first input of the
-  top-level asset definition coinbase transaction must be nullary (=0=
-  /txid/, =INT_MAX= /n/-index).
+  block-level asset definition coinbase transaction must be nullary
+  (=0= /txid/, =INT_MAX= /n/-index).
 
 - Unlike the Freicoin miner coinbase, the asset definition coinbase
   string (the =scriptSig= of the nullary input) is allowed to have a
   length within the closed interval =[0, 65535]=. However the string
   must be script-parseable and meet other criteria specified below.
 
-- The coinbase string may optionally contain the asset’s
-  interest/demurrage rate, unit granularity, or display scale,
-  overriding the default values of 0, unspecified, and +377,
-  respectfully.
+- The coinbase string contains the asset’s interest/demurrage rate,
+  unit granularity, and display scale. These values are =decimal64=,
+  =decimal64=, and signed integer, respectfully.
 
-- Other inputs besides the nullary input are allowed. These inputs may
-  be any combination of ordinary and coinbase extension unspent
-  outputs, provided that if more than one coinbase extension output is
-  used, all must be of the same asset type.
+- Other inputs besides the nullary input are allowed.
 
 - An asset definition generating transaction may not hash (ripemd160 .
   sha256) to any extant asset tag unless all asset tokens for the
   previously defined asset have been destroyed by spending to a
-  provably unspendable, prunable output scriptPubKey.
+  provably unspendable, prunable output (=scriptPubKey= prefixed with
+  =OP_RETURN=).
 
 - The 0-hash asset tag refers to the asset being defined, within the
   context of the asset definition transaction only.
 
-- The coinbase extension output does not require its own issuer or
-  authorizer signatures (the issuer and authorizer lists take effect
-  after the asset definition transaction).
-
-The coinbase transaction creating an asset is the asset definition
-genesis transaction. Such a transaction has a single nullary input
-(thereby marking it as a coinbase), and zero or more ordinary inputs
-containing freicoins or other asset tokens of any type, typically used
-to supply a fee [fn:coinbase]. The output vector may contain ordinary
-outputs, as well as any number of coinbase extension outputs which are
-marked by an all-zero asset tag.
+- The transaction does not require its own issuer or authorizer
+  signatures (the issuer and authorizer lists of the asset being
+  defined take effect /after/ the asset definition transaction).
 
 * Example use cases and Bitcoin scripts
 
