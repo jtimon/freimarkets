@@ -116,9 +116,9 @@ That is to say, an old-style minimum representable positive value of 1 kria (0.0
 
 ** Indivisible tokens
 
-New-style outputs contain the =decimal64= continuous value combined with a possibly empty list of bitstrings. These bitstrings are indivisible, unique outputs. Any output unique must be found in an input of the enclosing transaction, and uniques cannot be shared among two outputs of the same transaction.
+New-style outputs contain the =decimal64= continuous value combined with a possibly empty list of bitstrings. These bitstrings are indivisible, unique outputs. Any output token must be found in an input of the enclosing transaction, and tokens cannot be shared among two outputs of the same transaction.
 
-The asset definition transaction, or any transaction with one or more of an assets’ issuers as signatory is allowed to violate the constraint that continuous outputs are less than or equal to inputs, and that output uniques are a subset of inputs for that asset.
+The asset definition transaction, or any transaction with one or more of an asset’s issuers as signatory is allowed to violate the constraint that continuous outputs are less than or equal to inputs, and that output unique tokens are a subset of inputs for that asset.
 
 ** Asset tags
 
@@ -136,7 +136,7 @@ A transaction may claim less than the full amount by utilizing a granular offer.
 
 In order to implement this functionality, the set of unspent transaction outputs must include a field recording the amount remaining (or equivalently, the amount spent so far).
 
-Fractional redemption of outputs containing uniques is not allowed.
+Fractional redemption of outputs containing unique tokens is not allowed.
 
 ** Validation scripts
 
@@ -148,7 +148,7 @@ As a special case, an empty =scriptValidPubKey= and =scriptValidSig= automatical
 
 ** Authorizing signatories
 
-New-style transactions have a sorted list of ~<assetid:bitstring, scriptSig>~ signatories. The =assetid= is the 20-byte asset tag, with bitstring taking the remaining bytes. The =scriptPubKey= is retrieved from the unspent transaction output containing the identified unique.
+New-style transactions have a sorted list of ~<assetid:token, scriptSig>~ signatories. The =assetid= is the 20-byte asset tag, with a token bitstring taking the remaining bytes. The =scriptPubKey= is retrieved from the unspent transaction output containing the identified authorizing token.
 
 ** TODO New scripting opcodes
 
@@ -174,9 +174,9 @@ This specification defines a new standard bitcoin transaction type, ~nVersion=3~
 
 - Outputs are prefixed with an asset identifier tag, a 20-byte serialized hash (~ripemd160 . sha256~) of the coinbase transaction from which the output's coins are derived. Each output contains coins and/or tokens from a single asset/currency. For the host currency Freicoin, the similarly-calculated 20-byte hash of the entire chain's genesis block is used instead; within an asset definition transaction, the asset being defined is identified with the 0 hash.
 
-- Outputs are suffixed with an optionally empty, sorted.
+- Outputs are suffixed with an optionally empty, sorted list of unique token bitstrings.
 
-- A sorted-list mapping of ~<assetid:unique, scriptSig>~ signatories is added immediately following =vout=.
+- A sorted-list mapping of ~<assetid:token, scriptSig>~ signatories is added immediately following =vout=.
 
 - A new script field, =scriptValidator=, is added following the signatories’ list.
 
