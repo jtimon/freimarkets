@@ -1,5 +1,5 @@
-Implementing the holy grail: distributed, p2p exchange; user-issued
-assets; off-chain transactions (crowdfund)
+[Crowdfund] Implementing Bitcoin's missing pieces: user-issued assets,
+p2p exchange, off-chain transactions, and more
 
 Off-and-on for the past couple years, Jorge Timón and Mark Friedenbach
 have been developing an extension of the Bitcoin and (pre-OpenCoin)
@@ -11,15 +11,16 @@ cross-chain trades. You will find the high-level details of our
 proposal below, plus a short listing of near-term uses, and a few
 example applications.
 
-The protocol will be deployed first to the Freicoin block chain, as
-the proposal builds on the interest and reference-height features of
-Freicoin, that community has already reached consensus in favor of the
-proposal and the proof of work of the is SHA256 and will be merged
-mined with Bitcoin. However the situation is in fact ideal for bitcoin
-as gateways and bridges allow people to transact in bitcoins or the
-currency of their choice without clogging the bitcoin block chain, and
-the proposal will be developed as a set of neutral patches which may
-be applied to any bitcoin-derived coin or private accounting server.
+The protocol will be deployed to the Freicoin block chain, which will
+be SHA256 merged mined against bitcoin, as demurrage prevents
+competition with bitcoin's store-of-value, the proposal builds on the
+interest and reference-height features already present in Freicoin,
+and that community has already reached consensus in favor of the
+proposal. The situation is ideal for bitcoin as gateways and bridges
+allow people to transact in bitcoins or the currency of their choice
+without clogging the bitcoin block chain, and the proposal will be
+developed as a set of neutral patches which may be applied to any
+bitcoin-derived coin or private accounting server.
 
 We are seeking 1,250btc to make it happen. This will pay all of our
 project and living expenses for the approximately 2 developer-years it
@@ -28,9 +29,9 @@ and deployment schedule, as well as limited travel budget to the major
 bitcoin conferences where results can be published and stakeholder
 input received.
 
-Our stretch goal of 1,750btc will add private accounting servers
-(a.k.a., off-chain transactions), which we expect to take an
-additional 3-6 months to develop and deploy.
+Our stretch goal of 1,750btc will add private accounting servers and
+associated protocols (off-chain transactions), which we estimate to
+take an additional 3-6 months to develop and deploy.
 
 Abstract
 
