@@ -697,7 +697,7 @@ before 10000 the private one is also valid, otherwise is rolled back.
 
 ** MODIFY Hybrid Transitive transaction
 
-    pubA -> pubB -> privC -> privD -> pubE -> userA
+pubA -> pubB -> privC -> privD -> pubE -> userA
 
 So the payer (userA) will pay pubA and receive pubE in exchange.
 PrivCs and privDs are managed by accountants accC and accD
