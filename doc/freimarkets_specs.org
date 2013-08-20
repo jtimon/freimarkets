@@ -362,14 +362,14 @@ identified authorizing token.
 
 *** TODO BLOCK_TIME and BLOCK_HEIGHT
 
-** REVIEW Transaction expiration
+** Transaction expiration
 
-=nExpireTime= works in a very similar way than nLockTime, mandating
+=nExpireTime= works in a very similar way than =nLockTime=, mandating
 in this case a maximum time (also specified in either unix time or
 block height), after which the transaction cannot be accepted into a
 block.
 
-See [[https://en.bitcoin.it/wiki/Protocol_specification#tx][nLockTime]] in Bitcoin's protocol specification for more details.
+See [[https://en.bitcoin.it/wiki/Protocol_specification#tx][=nLockTime=]] in Bitcoin's protocol specification for more details.
 
 * Formal specification
 ** ~nVersion=3~ transactions
@@ -452,9 +452,9 @@ nVersion=3 transactions:
    validate.
 
 10. The current time or block height must be less than or equal to the
-    transaction's nExpireTime, where the single field can be
+    transaction's =nExpireTime=, where the single field can be
     interpreted as either a block number or UNIX timestamp in the same
-    manner as nLockTime.
+    manner as =nLockTime=.
 
 11. For the purposes of enumeration and indexing, the inputs and the
     outputs of the top-level transaction are counted first, followed
