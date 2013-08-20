@@ -60,13 +60,9 @@ When talking about the host currency we speak of freicoins, with 1 freicoin (1 f
 
 Here we describe in non-normative prose the proposed changes. We assume technical familiarity with the bitcoin protocol and Freicoin’s various extensions thereof.
 
-** Unique assets
-
-Unique indivisible assets (or just "uniques" or "indivisibles") are good for things like physical ownership - keys to a smart car, numbered seats or membership tokens. Since they directly relate in the UTXO a given unique asset with its current ownership, it's not necessary anymore to trace the ownership back to a "genesis transaction" like you would need to do with a colored coins approach [fn:colored]. This allows smart property clients to have smaller requirements if the UTXO tree is hashed with each block [fn:utxo].
-
 ** Indivisible, unique tokens
 
-Indivisible, uniquely identifiable asset tokens are useful for applications like physical ownership - keys to a smart car, numbered seats or membership tokens. Since an indivisible is contained within no more than one unspent transaction output at any given time, it’s not necessary to trace the ownership back to a “genesis transaction” as one would need to do with a colored coins approach [fn:colored]. This allows smart property clients to have smaller requirements if authenticated unspent transaction output index checkpoints are included in each block [fn:utxo].
+Indivisible, uniquely identifiable asset tokens are useful for applications like physical ownership - keys to a smart car, numbered seats or membership tokens. Since a token is contained within no more than one unspent transaction output at any given time, it’s not necessary to trace the ownership back to a “genesis transaction” as one would need to do with a colored coins approach [fn:colored]. This allows smart property clients to have smaller requirements when authenticated unspent transaction output index checkpoints are included in each block [fn:utxo].
 
 ** User-issued assets
 
