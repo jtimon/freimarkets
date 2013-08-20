@@ -186,7 +186,7 @@ definition transaction.
 
 This proposal extends the transaction format with an optionally empty
 nested level of sub-transactions. Sub-transactions differ from
-regular, top-level transactions in that their inputs and outputs are
+regular, block-level transactions in that their inputs and outputs are
 not required to balance and they have associated with them a quantity
 and granularity allowing for fractional redemption.
 
@@ -330,8 +330,8 @@ allowed.
 
 New-style transactions have a validation script, split into the two
 fields =scriptValidPubKey= and =scriptValidSig=, which when combined
-and executed must run without abnormal termination, and return a
-non-zero value on the stack for a transaction to be valid.
+and executed must run to completion without abnormal termination, and
+return a non-zero value on the stack for a transaction to be valid.
 
 While performing signature operations in any other script, the
 =scriptValidSig= is set to the empty script before performing hash
@@ -354,10 +354,11 @@ identified authorizing token.
 
 ** TODO New scripting opcodes
 
+*** TODO =BLOCK_TIME= and =BLOCK_HEIGHT=
 *** TODO =DELEGATION_SEPARATOR=
 *** TODO =OUT_EXISTS=
 *** TODO =OUT_SPENT=
-*** TODO =BLOCK_TIME= and =BLOCK_HEIGHT=
+
 ** Transaction expiration
 
 =nExpireTime= works in a very similar way than =nLockTime=, mandating
@@ -539,6 +540,7 @@ outputs, as well as any number of coinbase extension outputs which are
 marked by an all-zero asset tag.
 
 * Example use cases and Bitcoin scripts
+
 ** MODIFY Private buy with public funds
 
 Seller constructs private order:
@@ -553,19 +555,19 @@ validation scriptPubKey:
 
 ...and signs the partial transaction.
 
-The validation script starts with =DELEGATION_SEPARATOR=, which is
-simply ignored by the script interpreter, but marks the part of the
-validation script that needs to be signed by the owners of the inputs
-in the transaction or sub-transaction, the rest
+The validation script contains =DELEGATION_SEPARATOR=, which is a NOP
+as far as the script interpreter is concerned, but marks the part of
+the validation script that needs to be signed by the accountant but
+not the owners of the inputs in the transaction or sub-transaction,
+the rest
 
-Note that there's some data being fetch from the stack, that data must
-be set by accountantB or the script will return false if it's not in
-the stack. Whoever appears in =OP_CHECKSIGVERIFY= (in this case
+Note that there's some data being fetched from the stack. That data
+must be set by accountantB or the script will return false if it's not
+in the stack. Whoever appears in =CHECKSIGVERIFY= (in this case
 accountantB) must sign the full transaction with the complete
-validation script that can be valid, including what's after
-=DELEGATION_SEPARATOR=.
+validation script, including what's before =DELEGATION_SEPARATOR=.
 
-Note also that he output refers to an external asset (FRC:pubA)
+Note also that the output refers to an external asset (FRC:pubA)
 accountantB has no control over. It is ignored for validation purposes
 and is only used to specify the exchange rate. If the accountant
 cheats the user with the exchange rate, there will be a proof of
