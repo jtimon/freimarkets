@@ -50,7 +50,7 @@ Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomi
 
   This proposal adds primitives to bitcoin necessary for implementing non-currency financial constructs, such as dividend-yielding bonds, asset ownership tokens, credit relationships, a variety of forms of smart contracts, and distributed marketplaces for exchanging all of the above. Private accounting servers provide a mechanism to support unlimited volume of off-chain transactions while being able to interact with in-chain assets through atomic cross-chain trade and an integrated peer-to-peer market.
 
-* REVIEW Description
+* Description
 
   Here we describe in non-normative prose the proposed changes. We assume technical familiarity with the bitcoin protocol and Freicoin’s various extensions thereof.
 
@@ -153,7 +153,7 @@ expiry: 10000
 #+BEGIN_SRC bitcoin
 <accountantB_sig> <accountantB_pk>
 50 OP_TOALTSTACK 10000 OP_TOALTSTACK
-OP_DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantB_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY_DEL
+CODE_SEPARATOR OP_DUP OP_HASH160 <accountantB_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
 OP_FROMALTSTACK OP_FROMALTSTACK seller1 pubA FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
 #+END_SRC
 
