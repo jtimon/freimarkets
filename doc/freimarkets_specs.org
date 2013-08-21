@@ -659,14 +659,16 @@ The buyer of a long put is taking the short put position.
 ** MODIFY [0/6] Trades involving off-chain assets
 *** MODIFY Private buy with public funds
 
-Seller constructs private order:
+Seller constructs private order (200 privB for 100 pubA):
 
 #+BEGIN_SRC bitcoin
-in: 100 privB
-out: 100 FRC:pubA to seller1
+in: 200 privB
+out: -
+granularity: 4
 validation scriptPubKey:
-    DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantB_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
-    OP_FROMALTSTACK (expiry) OP_FROMALTSTACK (amount) seller1 pubA FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
+  DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantB_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
+  OP_FROMALTSTACK (amount) OP_DUP 25 OP_DIV QUANTITY OP_EQUALVERIFY
+  OP_FROMALTSTACK (expiry) seller1 pubA FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
 #+END_SRC
 
 ...and signs the partial transaction.
