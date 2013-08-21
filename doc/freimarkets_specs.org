@@ -1,6 +1,6 @@
-#+TITLE: FreiMarkets: credit, assets, and p2p exchange
-#+AUTHOR:
-#+EMAIL:
+#+TITLE: FreiMarkets: assets, p2p exchange and off-chain transactions
+#+AUTHOR: Mark Friedenbach, Jorge Timón
+#+EMAIL: mark@monetize.io, jtimon@monetize.io
 #+KEYWORDS: p2p exchange, crypto-assets, crypto-credit, smart property, colored coins, ripple, off-chain transactions, cross-chain trade
 #+LANGUAGE: en
 #+LaTeX_CLASS: article
