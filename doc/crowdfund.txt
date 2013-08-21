@@ -1,329 +1,186 @@
-[Crowdfund] Implementing Bitcoin's missing pieces: user-issued assets,
-p2p exchange, off-chain transactions, and more
+[Crowdfund] User-issued assets, p2p exchange, off-chain transactions, and more
 
-Off-and-on for the past couple years, Jorge Timón and Mark Friedenbach
-have been developing an extension of the Bitcoin and (pre-OpenCoin)
-Ripple distributed protocols which allows any person to issue their
-own blockchain assets, enables signing of binding offers within a
-distributed, p2p exchange, and provides the foundation for off-chain
-transactions using bitcoin-derived private accounting servers and
-cross-chain trades. You will find the high-level details of our
-proposal below, plus a short listing of near-term uses, and a few
-example applications.
+This is a proposal for implementing bitcoin's missing pieces, the holy grail of user-issued assets, distributed peer-to-peer exchange, off-chain transactions, and the multitude of financial constructs these primitives make possible.
 
-The protocol will be deployed to the Freicoin block chain, which will
-be merged mined against bitcoin. Demurrage prevents competition with
-bitcoin's store-of-value, the proposal builds on the interest and
-reference-height features already present in Freicoin, and that
-community has already reached consensus in favor of the proposal. The
-situation is ideal for bitcoin as gateways and bridges allow people to
-transact in bitcoins or the currency of their choice without clogging
-the bitcoin block chain, and the proposal will be developed as a set
-of neutral patches which may be applied to any bitcoin-derived coin or
-private accounting server.
+[hr]
 
-We are seeking 1,250btc to make it happen. This will pay all of our
-project and living expenses for the approximately 2 developer-years it
-will take to implement the core features of the protocol and a testing
-and deployment schedule, as well as limited travel budget to the major
-bitcoin conferences where results can be published and stakeholder
-input received.
+[color=maroon][size=12pt][b][u]Summary[/u][/b]:[/size][/color]
 
-Our stretch goal of 1,750btc will add private accounting servers and
-associated protocols (off-chain transactions), which we estimate to
-take an additional 3-6 months to develop and deploy.
+Off-and-on for the past couple years, Jorge Timón and Mark Friedenbach have been developing an extension of the Bitcoin and (pre-OpenCoin) Ripple distributed protocols which allows any person to issue their own blockchain assets, enables signing of binding offers within a distributed, p2p exchange, and provides the foundation for off-chain transactions using bitcoin-derived private accounting servers and cross-chain trades. You will find the high-level details of our proposal below, plus a short listing of near-term uses, and a few example applications. A more detailed whitepaper PDF is currently being prepared and will be released shortly.
 
-Abstract
+The protocol will be deployed to the Freicoin block chain, which will be merged mined against bitcoin. Demurrage prevents competition with bitcoin's store-of-value, the proposal builds on the interest and reference-height features already present in Freicoin, and that community has already reached consensus in favor of the proposal. The situation is ideal for bitcoin as gateways and bridges allow people to transact in bitcoins or the currency of their choice without clogging the bitcoin block chain (the Freicoin maximum block size will expand to accommodate new traffic), and the proposal will be developed as a set of neutral patches which may be applied to any bitcoin-derived coin or private accounting server.
 
-Herein we propose a new transaction format which enables hierarchies
-of independently verified sub-transactions, additional validation
-scripts and introspective opcodes, strict currency controls for user
-assets, as well as relaxation of the rules regarding coin generation
-via coinbase transactions for the purpose of supporting user-defined
-assets on the block-chain. We also introduce the concept of private
-centralized accounting servers to perform transactions of off-chain
-assets that cam interact with each other as well as with in-chain
-assets. Combined with suitable extensions to the peer-to-peer,
-JSON-RPC, RESTful, and wallet interfaces, these protocol changes
-complete bitcoin’s repertoire of low-level constructs, allowing the
-emulation of a wide variety of financial instruments.
+We are seeking 1,250btc to make it happen. This will pay all of our project and living expenses for the approximately 2 developer-years it will take to implement the core features of the protocol and a testing and deployment schedule, as well as limited travel budget to the major bitcoin conferences where results can be published and stakeholder input received.
+
+Our stretch goal of 1,750btc will add private accounting servers and associated protocols (off-chain transactions), which we estimate to take an additional 3-6 months to develop and deploy.
+
+The bitcoin/freicoin donation address for this project is:
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+[url=https://blockchain.info/address/1PJk47YLJaDEGTEq2EYFR5hCQHpwBU1nSx][size=12pt]1PJk47YLJaDEGTEq2EYFR5hCQHpwBU1nSx[/size][/url]
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG/MacGPG2 v2.0.19 (Darwin)
+Comment: GPGTools - http://gpgtools.org
+
+iQIcBAEBAgAGBQJSE/72AAoJEAdzVfsmodw4HbYP/RcBT/0aEeu31BJDMGbajOge
+Jb6CjkH47cmREBx+SRixi/UhYNNtpbM+kLBYPUFL+yDurQI9XVQEfXCvRccFzjM+
+s/WpVNUg+snecMgW8U7w5klAiwjXc7hFm5fS+Xcw0lDKe3CQT6fRHMelec8pYG7n
+plM+z454OlxQqLn+ou0izFs1KO4Sb1M17EDaxt828SxiB95/zbnolXJ/mVSzradZ
+Sdh30iLhXWGSyYap2eaFesaUbFs0U/thB/DwLSEB+Ppeca37fR6CGz5+13s5V9ug
+uukeJ+8RR+dWN0DWyJ3kyyRo4/sV0Y61GGS4goGpS3CX+W9gDR8YBMKlq/2sKdBV
+79Fr0H9Za7WO3JT2VRK5ySMBLi1cWXu2+9MY/fePizWmo8Y7tC6QSPomBzstjGD1
+O5xJ1Oy87M9j+IQcfxlUnSJdLEVUjesqdzmL3s+UlsCBcaUhqhbk4rsQ1gB/jkdY
+Zh57U2uPOx1v/pEeu0H2ByZ15v4E/b8sxQRUIk0zt2Z2jCF0pIOzlAPLrP1vhiHq
+l7TyTsP73xcCsurbAdVoyN4MYT7p9ZDGL7zQDmLDnTzOxhaNsHlOPweLN4+OU48G
+MxDlmQ0CtGmtxD1EuK1c+SnlFcffCfcZalxM7+P2Bzq0DQUGTEnzkXJsgL3CYrYV
+ku7UgH1q1N1BqY0dGLSZ
+=DBGH
+-----END PGP SIGNATURE-----
+
+[color=maroon][size=12pt][b][u]Overview[/u][/b]:[/size][/color]
+
+Herein we propose a new transaction format which enables hierarchies of independently verified sub-transactions, additional validation scripts and introspective opcodes, strict currency controls for user assets, as well as relaxation of the rules regarding coin generation via coinbase transactions for the purpose of supporting user-defined assets on the block-chain. We also introduce the concept of private centralized accounting servers to perform transactions of off-chain assets that cam interact with each other as well as with in-chain assets. Combined with suitable extensions to the peer-to-peer, JSON-RPC, RESTful, and wallet interfaces, these protocol changes complete bitcoin’s repertoire of low-level constructs, allowing the emulation of a wide variety of financial instruments.
 
 Together this enables the following sorts of applications:
 
-* Issuing new assets by means of [i]asset definition transactions[/i]
-  (coinbase transactions other than the usual first transaction of a
-  block). Such assets are allowed to specify their own
-  interest/demurrage rate, unit granularity, display scale, and
-  contain a hash field referencing an external resource, possibly a
-  legal or Ricardian contract that the chain itself doesn't have to
-  validate.
+[list]
+[li]Issuing new assets by means of [i]asset definition transactions[/i] (coinbase transactions other than the usual first transaction of a block). Such assets are allowed to specify their own interest/demurrage rate, unit granularity, display scale, and contain a hash field referencing an external resource, possibly a legal or Ricardian contract that the chain itself doesn't validate.[/li]
 
-* Issuing unique and indivisible assets that are transferred in sets
-  instead of numeric amount, and allow fast look ups on their current
-  ownership to enhance smart property use cases and manage some
-  permissions of the regular custom assets.
+[li]Issuing unique and indivisible assets that are transferred in sets instead of numeric amount, and allow fast look ups on their current ownership to enhance smart property use cases and manage some permissions of the regular custom assets.[/li]
 
-* Atomic exchange of assets of differing types through inclusion of
-  inputs and outputs of both types in a single transaction.
+[li]Atomic exchange of assets of differing types through inclusion of inputs and outputs of both types in a single transaction.[/li]
 
-* Signing orders (partial-transactions giving up one asset in exchange
-  for another) that are binding but not completed until they get into
-  the chain as part of a balanced transaction, and have attached
-  expiration dates or can be explicitly cancelled by double-spending
-  the signed inputs.
+[li]Signing orders (partial-transactions giving up one asset in exchange for another) that are binding but not completed until they get into the chain as part of a balanced transaction, and have attached expiration dates or can be explicitly cancelled by double-spending the signed inputs.[/li]
 
-* Executing an arbitrary number of these orders atomically by creating
-  a complete valid transaction where the orders are included as nested
-  [i]sub-transactions[/i], thereby executing an atomic trade without
-  requiring each of the parties to be online or in direct
-  communication with each other. Composing orders from separate
-  markets into an atomic trade with intermediate assets enables
-  payments based on transitive trust relationships.
+[li]Executing an arbitrary number of these orders atomically by creating a complete valid transaction where the orders are included as nested [i]sub-transactions[/i], thereby executing an atomic trade without requiring each of the parties to be online or in direct communication with each other. Composing orders from separate markets into an atomic trade with intermediate assets enables payments based on transitive trust relationships.[/li]
 
-* Destruction of coins, tokens, or assets when no longer needed by a
-  special class of non-spendable, prunable output script.
+[li]Destruction of coins, tokens, or assets when no longer needed by a special class of non-spendable, prunable output script.[/li]
 
-* Restricting the conditions by which a transaction or sub-transaction
-  may be selected for inclusion by specifying [i]validation
-  scripts[/i], which are run when the enclosing block is
-  validated. Introspection of the block chain from within the bitcoin
-  scripting environment is enabled by the introduction of new opcodes.
+[li]Restricting the conditions by which a transaction or sub-transaction may be selected for inclusion by specifying [i]validation scripts[/i], which are run when the enclosing block is validated. Introspection of the block chain from within the bitcoin scripting environment is enabled by the introduction of new opcodes.[/li]
 
-* Running accounting servers as private chains with centralized rather
-  than distributed consensus, in which off-chain assets can be issued,
-  transferred and traded in the same way they are in the public chain,
-  with the private block chain providing an audit log.
+[li]Running accounting servers as private chains with centralized rather than distributed consensus, in which off-chain assets can be issued, transferred and traded in the same way they are in the public chain, with the private block chain providing an audit log.[/li]
 
-* Execute an arbitrary number of trades from different accounting
-  servers and/or the public chain in an atomic transaction, using
-  either the public chain or an agreed upon timestamping service for
-  the commit phase.
+[li]Execute an arbitrary number of trades from different accounting servers and/or the public chain in an atomic transaction, using either the public chain or an agreed upon timestamping service for the commit phase.[/li]
 
-* Public chains or private accounting servers configured to “observe”
-  other chains to enable much faster but secure cross-chain trade,
-  compared with the existing slow, multi-phase protocols involving
-  revelation of hashed secrets. This requires the ability to extract
-  proofs from the observed chain in order to validate conditional
-  transactions.
+[li]Public chains or private accounting servers configured to “observe” other chains to enable much faster but secure cross-chain trade, compared with the existing slow, multi-phase protocols involving revelation of hashed secrets. This requires the ability to extract proofs from the observed chain in order to validate conditional transactions.[/li]
 
-* Restrict the usage of a custom asset by assigning to it rotatable
-  signing keys which that must sign all transactions involving the
-  restricted assets prior to inclusion (support for KYC regulatory
-  compliance).
+[li]Restrict the usage of a custom asset by assigning to it rotatable signing keys which that must sign all transactions involving the restricted assets prior to inclusion (support for KYC regulatory compliance).[/li]
+[/list]
 
-This proposal adds primitives to bitcoin necessary for implementing
-non-currency financial constructs, such as dividend-yielding bonds,
-asset ownership tokens, credit relationships, a variety of forms of
-smart contracts, and distributed marketplaces for exchanging all of
-the above. Private accounting servers provide a mechanism to support
-unlimited volume of off-chain transactions while being able to
-interact with in-chain assets through atomic cross-chain trade and an
-integrated peer-to-peer market.
+This proposal adds primitives to bitcoin necessary for implementing non-currency financial constructs, such as dividend-yielding bonds, asset ownership tokens, credit relationships, a variety of forms of smart contracts, and distributed marketplaces for exchanging all of the above. Private accounting servers provide a mechanism to support unlimited volume of off-chain transactions while being able to interact with in-chain assets through atomic cross-chain trade and an integrated peer-to-peer market.
 
-[b]User-issued assets[/b]
+[color=maroon][size=12pt][b][u]User-issued assets[/u][/b]:[/size][/color]
 
-Divisible currency and/or tokens representing user-issued assets may
-be minted in special coinbase transactions separate from the usual
-first transaction of a block (where bitcoins are currently, and
-continue to be minted). Coins created in such generating transactions
-are not bitcoins, but rather [i]user-issued asset shares[/i] which
-represent fungible ownership of the underlying asset type, or [i]asset
-tokens[/i] identified by per-asset unique bitstrings. Such coins and
-tokens can be included in transactions containing regular p2p-issued
-coins, which in this proposal is sometimes called the [i]host
-currency[/i] or [i]fee currency[/i].
+Divisible currency and/or tokens representing user-issued assets may be minted in special coinbase transactions separate from the usual first transaction of a block (where bitcoins are currently, and continue to be minted). Coins created in such generating transactions are not bitcoins, but rather [i]user-issued asset shares[/i] which represent fungible ownership of the underlying asset type, or [i]asset tokens[/i] identified by per-asset unique bitstrings. Such coins and tokens can be included in transactions containing regular p2p-issued coins, which in this proposal is sometimes called the [i]host currency[/i] or [i]fee currency[/i].
 
-The creator of the new asset can define an interest/demurrage
-rate. The quantity issued may be fixed or he may define a list of
-issuance tokens that permit their owners issue new units of the asset
-being defined.
+The creator of the new asset can define an interest/demurrage rate. The quantity issued may be fixed or he may define a list of issuance tokens that permit their owners issue new units of the asset being defined.
 
-The creator of the asset definition transaction may also specify a
-list of authorizer tokens. The signature of an authorizer is required
-every time a transaction involves inputs or outputs of that
-asset. This allows issuers/gateways to manage closed list of
-“authorized accounts” of registered users if regulatory restrictions
-of their jurisdiction requires them to do so or if they desire
-whitelisting of participants (for example, local currencies or
-restricted stock sales). It also allows issuers to charge fees when
-the assets are traded or moved.
+The creator of the asset definition transaction may also specify a list of authorizer tokens. The signature of an authorizer is required every time a transaction involves inputs or outputs of that asset. This allows issuers/gateways to manage closed list of “authorized accounts” of registered users if regulatory restrictions of their jurisdiction requires them to do so or if they desire whitelisting of participants (for example, local currencies or restricted stock sales). It also allows issuers to charge fees when the assets are traded or moved.
 
-Using unique tokens to manage new issuance and authorizers allows the
-creator to follow his own key cycling policy or security protocols. By
-utilizing multisig or multiple signatures, it is possible for
-transactions to remain valid even across one or more key rotations.
+Using unique tokens to manage new issuance and authorizers allows the creator to follow his own key cycling policy or security protocols. By utilizing multisig or multiple signatures, it is possible for transactions to remain valid even across one or more key rotations.
 
-These various properties of the asset, its interest/demurrage rate,
-unit granularity and display scale, and listings of issuer and
-authorizer tokens are set in the coinbase string of the asset
-definition transaction.
+These various properties of the asset, its interest/demurrage rate, unit granularity and display scale, and listings of issuer and authorizer tokens are set in the coinbase string of the asset definition transaction.
 
-[b]Partial transactions[/b]
+[color=maroon][size=12pt][b][u]Partial transactions[/u][/b]:[/size][/color]
 
-This proposal extends the transaction format with an optionally empty
-nested level of sub-transactions. Sub-transactions differ from
-regular, top-level transactions in that their inputs and outputs are
-not required to balance and they have associated with them a quantity
-and granularity allowing for fractional redemption.
+This proposal extends the transaction format with an optionally empty nested level of sub-transactions. Sub-transactions differ from regular, top-level transactions in that their inputs and outputs are not required to balance and they have associated with them a quantity and granularity allowing for fractional redemption.
 
-Since validation of sub-transactions occurs separately from each other
-and the higher-level enclosing transaction, pre-signed, unbalanced
-transactions are able to act as offers on a distributed exchange:
-market participants sign offers adding coins of one asset type in
-exchange for an output of another type. These signed offers are
-broadcast through a side-channel and aggregated by miners. When a
-cross-over is detected (a bid higher than an ask), the miner combines
-the two pre-signed offers and claims the difference as a fee.
+Since validation of sub-transactions occurs separately from each other and the higher-level enclosing transaction, pre-signed, unbalanced transactions are able to act as offers on a distributed exchange: market participants sign offers adding coins of one asset type in exchange for an output of another type. These signed offers are broadcast through a side-channel and aggregated by miners. When a cross-over is detected (a bid higher than an ask), the miner combines the two pre-signed offers and claims the difference as a fee.
 
-Other use cases are enabled. For example, when the underlying assets
-represent lines of credit, the exchange mechanism allows payments
-based on transitive trust relationships, in the style of the original
-Ripplepay application by Ryan Fugger.
+Other use cases are enabled. For example, when the underlying assets represent lines of credit, the exchange mechanism allows payments based on transitive trust relationships, in the style of the original Ripplepay application by Ryan Fugger.
 
-[b]Private ledgers[/b]
+[color=maroon][size=12pt][b][u]Private ledgers[/u][/b]:[/size][/color]
 
-Private accounting servers (the “accountant”) use a variant of the
-bitcoin code base that is stripped of the distributed consensus
-proof-of-work mechanism. Accountants are responsible for eliminating
-double-spending, reserving balances for pending transfers, and
-authorizing transactions, sometimes conditionally on external
-events. Accountants are able to prevent transactions from going
-through if the owner has already obligated funds elsewhere, by keeping
-track of the available balance (actual balance minus funds in various
-stages of commit). Accountants use various distributed consensus
-mechanisms for coordinating the transaction commitment with other
-private accounting servers or public block chains.
+Private accounting servers (the “accountant”) use a variant of the bitcoin code base that is stripped of the distributed consensus proof-of-work mechanism. Accountants are responsible for eliminating double-spending, reserving balances for pending transfers, and authorizing transactions, sometimes conditionally on external events. Accountants are able to prevent transactions from going through if the owner has already obligated funds elsewhere, by keeping track of the available balance (actual balance minus funds in various stages of commit). Accountants use various distributed consensus mechanisms for coordinating the transaction commitment with other private accounting servers or public block chains.
 
-The level of privacy may vary from one server to another. Server
-operators are allowed freedom in choosing which parts of the block
-chain audit log to publish, with a sensible default being the block
-headers and coinbase transactions, allowing for validation of
-authenticated inclusion and index proofs used to notify users of their
-wallet balance, history and current activity, but not revealing other
-user’s balances.
+The level of privacy may vary from one server to another. Server operators are allowed freedom in choosing which parts of the block chain audit log to publish, with a sensible default being the block headers and coinbase transactions, allowing for validation of authenticated inclusion and index proofs used to notify users of their wallet balance, history and current activity, but not revealing other user’s balances.
 
-By using newly added introspective opcodes to construct scripts
-dependent on external chains, it is possible for private transactions
-to be conditional on public block chain data or other private
-accounting servers.
+By using newly added introspective opcodes to construct scripts dependent on external chains, it is possible for private transactions to be conditional on public block chain data or other private accounting servers.
 
-Note that the opposite relation cannot apply at this time. Public
-chains could support transactions conditional to data on other chains
-to enhance cross-chain trade, but then the observing chain’s
-validation becomes dependent on the observed chain validation. This
-approach to cross-chain has been described several times elsewhere,
-and would be trivial to implement with this protocol extension.
+Note that the opposite relation cannot apply at this time. Public chains could support transactions conditional to data on other chains to enhance cross-chain trade, but then the observing chain’s validation becomes dependent on the observed chain validation. This approach to cross-chain has been described several times elsewhere, and would be trivial to implement with this protocol extension.
 
-[b]Example[/b]: English & Dutch auctions
+[color=maroon][size=12pt][b][u]About us[/u][/b]:[/size][/color]
 
-In the English auction, the owner of an asset declares his intent to
-sell by auction, and starts collecting bids of the following form:
+Mark Friedenbach is a software engineer, formerly a contractor at NASA-Ames Research Center who left to become an independent bitcoin protocol developer. He is chiefly responsible for Freicoin's specific implementation details, as well as later modifications such implementation and optimization of the FIR filter difficulty adjustment algorithm (designed by @galambo). Mark was a speaker at the Bitcoin 2013 U.S. conference, and it is currently engaged in implementing Alan Reiner's Ultimate blockchain compression w/ trust-free lite nodes (link) proposal, work which will continue alongside this proposal if funded.
 
+Jorge Timón is a software engineer with 4 years of experience at Indra, working on big international projects including software for several insurance companies. He co-designed Ripple Distributed Protocol v0.6 (pre-OpenCoin) with Ryan Fugger and explained it and Freicoin at several complementary currency related conferences, a community in which he remains an active member. He proposed and co-designed Freicoin and is currently working on various free software tools for the Freicoin Foundation.
+
+Both Mark and Jorge are advisors on the subject matter of new money systems for the board of the non-profit Lifeboat Foundation.
+
+[color=maroon][size=12pt][b][u]Examples[/u][/b][/size][/color]
+
+[b][u]English & Dutch auctions[/u][/b]
+
+In the English auction, the owner of an asset declares his intent to sell by auction, and starts collecting bids of the following form:
+
+[code]
     in: <bid price>
-    out: <asset being auctioned, to buyer>
+    out: <asset being auctioned, to buyer>[/code]
 
-When the auction is ended, the seller selects the highest bid and
-composes a complete transaction:
+When the auction is ended, the seller selects the highest bid and composes a complete transaction:
 
+[code]
     sub-txns: <highest bid>
     in: <asset being auctioned>
-    out: <bid price minus fee, to seller>
+    out: <bid price minus fee, to seller>[/code]
 
-Since this is a higher-level transaction, the signature of the seller
-covers the included highest bid sub-transaction.
+Since this is a higher-level transaction, the signature of the seller covers the included highest bid sub-transaction.
 
-A Dutch auction is basically the same, but with the roles of the buyer
-and seller reversed. The seller suggests a price by constructing an
-offer of the following format:
+A Dutch auction is basically the same, but with the roles of the buyer and seller reversed. The seller suggests a price by constructing an offer of the following format:
 
+[code]
     in: <asset being auctioned>
-    out: <bid price, to seller>
+    out: <bid price, to seller>[/code]
 
-The seller then broadcasts this offer and waits some period of time to
-see if anyone takes it. If not, the price is lowered and a new offer
-broadcast. The seller knows an offer has been accepted and the auction
-closed when he detects a transaction of the following form on the
-network:
+The seller then broadcasts this offer and waits some period of time to see if anyone takes it. If not, the price is lowered and a new offer broadcast. The seller knows an offer has been accepted and the auction closed when he detects a transaction of the following form on the network:
 
+[code]
     sub-txns: <one of the seller's offers>
     in: <bid price>
-    out: <asset being auctioned, to buyer>
+    out: <asset being auctioned, to buyer>[/code]
 
-The first buyer to get a combined transaction on the chain using one
-of the seller's offers wins the auction.
+The first buyer to get a combined transaction on the chain using one of the seller's offers wins the auction.
 
-Note that although a variety of auction types are implementable, this
-system is unfortunately not expressive enough to manage the ideal
-Vickrey second-price auction in a trust-free manor. There are,
-however, implementable cryptographic protocols for doing so
-out-of-protocol using homomorphic encryption.
+Note that although a variety of auction types are implementable, this system is unfortunately not expressive enough to manage the ideal Vickrey second-price auction in a trust-free manor. There are, however, implementable cryptographic protocols for doing so out-of-protocol using homomorphic encryption.
 
-[b]Example[/b]: Double auction (market/exchange)
+[b][u]Double auction (market/exchange)[/u][/b]
 
-This is a generalization of the multi-item English auction. For any
-asset pairing, an out-of-chain mechanism exists for constructing,
-sharing, and collecting signed offers of the following forms:
+This is a generalization of the multi-item English auction. For any asset pairing, an out-of-chain mechanism exists for constructing, sharing, and collecting signed offers of the following forms:
 
+[code]
     in: <assetA:1A>
     out: <assetB:1B, to person constructing offer>
     granularity: N
 
     in: <assetB:2B>
     out: <assetA:2A, to person constructing offer>
-    granularity: M
+    granularity: M[/code]
 
-The first offer is a bid of assetA for assetB at a price of 1B/1A. The
-second offer is the corresponding ask: assetB for assetA at a price of
-2B/2A. So long as the bid price is greater than the ask price, it is
-possible for anyone to combine these two offers together to yield a
-composite market transaction:
+The first offer is a bid of assetA for assetB at a price of 1B/1A. The second offer is the corresponding ask: assetB for assetA at a price of 2B/2A. So long as the bid price is greater than the ask price, it is possible for anyone to combine these two offers together to yield a composite market transaction:
 
+[code]
     sub-txns: <bid, quantity n<=N>
               <ask, quantity m<=M>
-    fee: <bid - ask, fee to miner>
+    fee: <bid - ask, fee to miner>[/code]
 
-The use of granularity and quantity allow fractional parts of each
-offer to be claimed, since in general there is no expectation that the
-offers
+The use of granularity and quantity allow fractional parts of each offer to be claimed, since in general there is no expectation that the offers
 
-Note that although the crossover spread could be claimed as an output,
-anyone else could take the bids and construct their own matching
-transaction and claim the fee for their own. We assume that miners
-will know how to do this, and one way or another the fee is ultimately
-claimed by them. Market clearing becomes a profitable source of
-revenue in addition to payment transaction fees.
+Note that although the crossover spread could be claimed as an output, anyone else could take the bids and construct their own matching transaction and claim the fee for their own. We assume that miners will know how to do this, and one way or another the fee is ultimately claimed by them. Market clearing becomes a profitable source of revenue in addition to payment transaction fees.
 
-[b]Example[/b]: Transitive trust relationships
+[b][u]Transitive trust relationships[/u][/b]
 
-By issuing assets representing IOU debts and signing outstanding
-offers representing lines of credit, standard marketplace mechanisms
-can be used to execute payments through networks of transitive trust
-relationships. These payments look just like the double-auction
-marketplace transactions covered above, except that they typically
-involve 3 or more asset types.
+By issuing assets representing IOU debts and signing outstanding offers representing lines of credit, standard marketplace mechanisms can be used to execute payments through networks of transitive trust relationships. These payments look just like the double-auction marketplace transactions covered above, except that they typically involve 3 or more asset types.
 
-[b]Example[/b]: Baskets currencies and gateways
+[b][u]Baskets currencies and gateways[/u][/b]
 
-A [i]basket currency[/i] can be issued and fully managed within the
-block chain. The basket manager issues asset value and then offers it
-in bidirectional exchange for multiple other assets at a fixed rate.
+A [i]basket currency[/i] can be issued and fully managed within the block chain. The basket manager issues asset value and then offers it in bidirectional exchange for multiple other assets at a fixed rate.
 
-Gateways are similar to basket currencies: an issuer creates an asset
-and then distributes it when funds are received out-of-protocol. This
-could be in the form of a fiat wire transfer, physical deposit of
-precious metals, or a cross-chain transaction (atomically swapping
-bitcoin for freicoin, for example). Assets are redeemed by a similar
-process in reverse.
+Gateways are similar to basket currencies: an issuer creates an asset and then distributes it when funds are received out-of-protocol. This could be in the form of a fiat wire transfer, physical deposit of precious metals, or a cross-chain transaction (atomically swapping bitcoin for freicoin, for example). Assets are redeemed by a similar process in reverse.
 
-[b]Example[/b]: Off-chain assets
+[b][u]Off-chain transactions[/u][/b]
 
-For ultimate privacy and scalability, off-chain accounting services
-are preferred. This proposal provides the missing pieces necessary for
-accounting servers to implement their own private block chains with a
-secure audit log and without the expensive distributed consensus
-mechanism, allowing opt-in global consensus only when it is necessary
-for “cross-chain” (multi-server, or public/private) trade.
+For ultimate privacy and scalability, off-chain accounting services are preferred. This proposal provides the missing pieces necessary for accounting servers to implement their own private block chains with a secure audit log and without the expensive distributed consensus mechanism, allowing opt-in global consensus only when it is necessary for “cross-chain” (multi-server, or public/private) trade.
 
-To support global consensus mechanisms, a new suite of extrospective
-opcodes are added, allowing transactions to contain cross-chain
-conditional dependencies.
+To support global consensus mechanisms, a new suite of extrospective opcodes are added, allowing transactions to contain cross-chain conditional dependencies.
