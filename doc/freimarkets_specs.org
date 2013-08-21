@@ -241,7 +241,7 @@ All internal computation of accounting quantities are performed using
 arbitrary precision fractions, or an equivalent mathematical system
 which does not suffer from loss of precision or over/underflow.
 
-*** MAX_MONEY / MoneyRange limitation
+*** =MAX_MONEY= / MoneyRange limitation
 
 The maximum numerical value allowed for any output or stored
 intermediary value of any asset type is 2^53 - 1 kria, or
