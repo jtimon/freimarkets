@@ -656,7 +656,19 @@ call seller is the long put buyer.
 *** Short Put
 
 The buyer of a long put is taking the short put position.
-** MODIFY [0/6] Trades involving off-chain assets
+** MODIFY [0/6] Off-chain transactions
+
+For ultimate privacy and scalability, off-chain accounting services
+are preferred. This proposal provides the missing pieces necessary for
+accounting servers to implement their own private block chains with a
+secure audit log and without the expensive distributed consensus
+mechanism, allowing opt-in global consensus only when it is necessary
+for “cross-chain” (multi-server, or public/private) trade.
+
+To support global consensus mechanisms, a new suite of extrospective
+opcodes are added, allowing transactions to contain cross-chain
+conditional dependencies.
+
 *** MODIFY Private buy with public funds
 
 Seller constructs private order (200 privB for 100 pubA):
@@ -887,8 +899,9 @@ At any point, accC, accD or even userA right before the end could stop
 signing and forwarding the transactions, but that would only cause all
 transaction to expire.
 
-*** TODO Several private assets with blockchain commit method
-*** TODO Several private assets with registry commit method
+*** TODO Private Transitive transaction
+**** TODO Using blockchain commit method
+**** TODO Using registry commit method
 *** TODO Simplified cross-chain trade contract
 * Footnotes
 
