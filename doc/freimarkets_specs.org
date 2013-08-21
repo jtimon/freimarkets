@@ -580,8 +580,104 @@ from ordinary transaction types:
 Here we expand the set of possible Bitcoin contracts [fn:contracts]
 by using the protocol extensions.
 
-** TODO Basic uses
-** TODO Auctions
+** MODIFY [0/3] Basic uses
+*** MODIFY Double auction (market/exchange)
+
+This is a generalization of the multi-item English auction. For any asset pairing, an out-of-chain mechanism exists for constructing, sharing, and collecting signed offers of the following forms:
+
+#+BEGIN_SRC bitcoin
+
+#+END_SRC
+
+#+BEGIN_SRC bitcoin
+    in: <assetA:1A>
+    out: <assetB:1B, to person constructing offer>
+    granularity: N
+
+    in: <assetB:2B>
+    out: <assetA:2A, to person constructing offer>
+    granularity: M
+#+END_SRC
+
+
+The first offer is a bid of assetA for assetB at a price of 1B/1A. The second offer is the corresponding ask: assetB for assetA at a price of 2B/2A. So long as the bid price is greater than the ask price, it is possible for anyone to combine these two offers together to yield a composite market transaction:
+
+#+BEGIN_SRC bitcoin
+    sub-txns: <bid, quantity n<=N>
+              <ask, quantity m<=M>
+    fee: <bid - ask, fee to miner>
+#+END_SRC
+
+
+The use of granularity and quantity allow fractional parts of each offer to be claimed, since in general there is no expectation that the offers
+
+Note that although the crossover spread could be claimed as an output, anyone else could take the bids and construct their own matching transaction and claim the fee for their own. We assume that miners will know how to do this, and one way or another the fee is ultimately claimed by them. Market clearing becomes a profitable source of revenue in addition to payment transaction fees.
+
+*** MODIFY Transitive trust relationships
+
+By issuing assets representing IOU debts and signing outstanding offers representing lines of credit, standard marketplace mechanisms can be used to execute payments through networks of transitive trust relationships. These payments look just like the double-auction marketplace transactions covered above, except that they typically involve 3 or more asset types.
+
+*** MODIFY Baskets currencies and gateways
+
+A /basket currency/ can be issued and fully managed within the block chain. The basket manager issues asset value and then offers it in bidirectional exchange for multiple other assets at a fixed rate.
+
+Gateways are similar to basket currencies: an issuer creates an asset and then distributes it when funds are received out-of-protocol. This could be in the form of a fiat wire transfer, physical deposit of precious metals, or a cross-chain transaction (atomically swapping bitcoin for freicoin, for example). Assets are redeemed by a similar process in reverse.
+
+** MODIFY Auctions
+*** MODIFY English Auction
+In the English auction, the owner of an asset declares his intent to
+sell by auction, and starts collecting bids of the following form:
+
+#+BEGIN_SRC bitcoin
+    in: <bid price>
+    out: <asset being auctioned, to buyer>
+#+END_SRC
+
+When the auction is ended, the seller selects the highest bid and
+composes a complete transaction:
+
+#+BEGIN_SRC bitcoin
+    sub-txns: <highest bid>
+    in: <asset being auctioned>
+    out: <bid price minus fee, to seller>
+#+END_SRC
+
+Since this is a higher-level transaction, the signature of the seller
+covers the included highest bid sub-transaction.
+*** MODIFY Dutch auction
+
+A Dutch auction is basically the same, but with the roles of the buyer
+and seller reversed. The seller suggests a price by constructing an
+offer of the following format:
+
+#+BEGIN_SRC bitcoin
+    in: <asset being auctioned>
+    out: <bid price, to seller>
+#+END_SRC
+
+The seller then broadcasts this offer and waits some period of time to
+see if anyone takes it. If not, the price is lowered and a new offer
+broadcast. The seller knows an offer has been accepted and the auction
+closed when he detects a transaction of the following form on the
+network:
+
+#+BEGIN_SRC bitcoin
+    sub-txns: <one of the seller's offers>
+    in: <bid price>
+    out: <asset being auctioned, to buyer>
+#+END_SRC
+
+The first buyer to get a combined transaction on the chain using one
+of the seller's offers wins the auction.
+
+*** Other auctions
+
+Note that although a variety of auction types are implementable, this
+system is unfortunately not expressive enough to manage the ideal
+Vickrey second-price auction in a trust-free manor. There are,
+however, implementable cryptographic protocols for doing so
+out-of-protocol using homomorphic encryption.
+
 ** REVIEW Options
 
 Options[fn:options] are financial instruments typically used to
