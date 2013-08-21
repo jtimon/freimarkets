@@ -740,58 +740,53 @@ the protocol extensions.
 The buyer pays premium P for the right to buy up to Q pubA in
 exchange of pubB at price X before expiry Exp.
 
-First the sub-transactions that contains all these terms is created
-(but not signed).
-
-Option sub-transaction:
-
-#+BEGIN_SRC bitcoin
-input: Q pubA (script1)
-output: Q * X pubB to <seller1 pkh>
-expiry: Exp
-#+END_SRC
-
-The output script in the input (script1) uses p2sh and looks like this:
-
-#+BEGIN_SRC bitcoin
-if (block_time < exp)
-   <buyer1 pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
-else
-   <seller2 pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
-#+END_SRC
-
-The buyer signs the following sub-transaction:
-
-#+BEGIN_SRC bitcoin
-input: P pubB
-output: Q pubA to <script1 hash>
-expiry: Exp2
-#+END_SRC
-
-The seller broadcast this last sub-transactions after completing it with:
+The seller signs the following option sub-transaction:
 
 #+BEGIN_SRC bitcoin
 input: Q pubA
-output: P pubB to <seller3 pkh>
+output: Q * X pubB to <seller1 pkh>
+expiry: Exp
+scriptValidPubKey:
+  OP_HASH160 <seller's secret hash> OP_EQUALVERIFY
+AND
+  if (block_time < exp)
+    <buyer1 pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
+  else
+    <seller3 pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
 #+END_SRC
 
-When this transaction gets into the chain, the contract is complete,
-the premium payment to the seller is final and the buyer can securely
-exercise his right to buy pubA with pubB at the specified price,
-because the seller cannot double-spend the funds in script1 until
-Exp, which cancels the option subtransaction.
+The buyer only lacks the seller's secret to be able to exercise the
+sub-transaction. So he pays the premium conditionally to the secret
+being revelead before Exp2 with the following sub-transaction:
 
-Exp2 must be earlier than Exp to protect the seller from DoS attacks
-from fake buyers.
+#+BEGIN_SRC bitcoin
+input: P pubB
+output: -
+expiry: Exp2
+scriptValidPubKey:
+  OP_HASH160 <seller's secret hash> OP_EQUALVERIFY
+#+END_SRC
 
-The payer could at any moment before Exp complete the option sub-transaction with:
+Finally, the seller completes the buyer's the transaction to receive
+the premium by revealing the secret, allowing the buyer to use the
+option transaction:
+
+#+BEGIN_SRC bitcoin
+input: -
+output: P pubB to <seller4 pkh>
+scriptValidSig: <seller's full secret>
+#+END_SRC
+
+Now the payer could at any moment before Exp complete the option
+sub-transaction with:
 
 #+BEGIN_SRC bitcoin
 input: Q pubB * X
 output: Q pubA to <buyer2 pkh>
+scriptValidSig: <buyer1 sig> <buyer1 pk> <seller's full secret>
 #+END_SRC
 
-In fact, the option subtransaction could have granularity allowing
+The option sub-transaction could have granularity allowing
 the buyer to buy portions of Q.
 
 *** Short Call
