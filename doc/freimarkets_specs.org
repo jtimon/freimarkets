@@ -576,9 +576,89 @@ from ordinary transaction types:
   signatures (the issuer and authorizer lists of the asset being
   defined take effect /after/ the asset definition transaction).
 
-* Example use cases and Bitcoin scripts
+* [1/4] Example use cases and Bitcoin scripts
 
-** MODIFY Private buy with public funds
+Here we expand the set of possible Bitcoin contracts [fn:contracts]
+by using the protocol extensions.
+
+** TODO Basic uses
+** TODO Auctions
+** REVIEW Options
+
+Options[fn:options] are financial instruments typically used to
+hedge. Here we describe how to implement the most basic types using
+the protocol extensions.
+
+*** Long Call
+
+The buyer pays premium P for the right to buy up to Q pubA in
+exchange of pubB at price X before expiry Exp.
+
+First the sub-transactions that contains all these terms is created
+(but not signed):
+
+#+BEGIN_SRC bitcoin
+input: Q pubA
+output: Q * X pubB
+expiry: Exp
+#+END_SRC
+
+The input script (script1) uses p2sh and works like this:
+
+#+BEGIN_SRC python
+if (block_time < exp):
+   buyer1 signs
+else
+   seller1 signs
+#+END_SRC
+
+Using bitcoin scripts:
+
+#+BEGIN_SRC bitcoin
+#+END_SRC
+
+The buyer signs the following sub-transaction:
+
+#+BEGIN_SRC bitcoin
+input: P pubB
+output: Q pubA to script1
+expiry: Exp2
+#+END_SRC
+
+The seller completes and broadcast the transaction adding:
+
+#+BEGIN_SRC bitcoin
+input: Q pubA
+output: P pubB to seller2
+#+END_SRC
+
+When this transaction gets into the chain, the contract is complete,
+the premium payment to the seller is final and the buyer can securely
+exercise his right to buy pubA with pubB at the specified price,
+because the seller cannot double-spend the funds in script1 until
+Exp, which cancels the option subtransaction.
+Exp2 must be earlier than Exp.
+
+*** Short Call
+
+The seller in the long call example is taking the short call position.
+    
+*** Long Put
+
+In the long call example the asset being traded was pubA and pubB was
+the base currency. If the premium is paid in pubA instead of pubB you
+can consider that pubB is the asset being traded and pubA is the base
+currency.
+The right to "buy pubA for pubB" is equivalent to "sell pubB for
+pubA". So in the previous example with the premium being paid in
+pubA, the long call buyer would be the long put seller, and the long
+call seller is the long put buyer.
+
+*** Short Put
+
+The buyer of a long put is taking the short put position.
+** MODIFY [0/6] Trades involving off-chain assets
+*** MODIFY Private buy with public funds
 
 Seller constructs private order:
 
@@ -660,7 +740,7 @@ Until that happens or height 10000 is reached the transaction is
 considered to be in process and after height 10000 without appearance
 of the public one, the private transaction is invalid.
 
-** MODIFY Buying public assets with private assets
+*** MODIFY Buying public assets with private assets
 
 The seller constructs the public order:
 
@@ -696,7 +776,7 @@ one to accountantA. The public transaction only lacks accountantA's
 signature to be valid. If the public transaction gets into the chain
 before 10000 the private one is also valid, otherwise is rolled back.
 
-** MODIFY Hybrid Transitive transaction
+*** MODIFY Hybrid Transitive transaction
 
 pubA -> pubB -> privC -> privD -> pubE -> userA
 
@@ -806,10 +886,9 @@ At any point, accC, accD or even userA right before the end could stop
 signing and forwarding the transactions, but that would only cause all
 transaction to expire.
 
-** TODO Several private assets with blockchain commit method
-** TODO Several private assets with registry commit method
-** TODO Simplified cross-chain trade contract
-
+*** TODO Several private assets with blockchain commit method
+*** TODO Several private assets with registry commit method
+*** TODO Simplified cross-chain trade contract
 * Footnotes
 
 [fn:colored] Colored coins approach to custom assets in the chain is
@@ -837,3 +916,8 @@ https://bitcointalk.org/index.php?topic=91843.0
 
 [fn:coinbase] This is in contrast to regular coinbase transactions
 which do not currently allow extra inputs.
+
+[fn:contracts] There are several contracts use cases already
+described in the bitcoin wiki: https://en.bitcoin.it/wiki/Contracts
+
+[fn:options] [[https://en.wikipedia.org/wiki/Option_(finance)#The_basic_trades_of_traded_stock_options_.28American_style.29]]
