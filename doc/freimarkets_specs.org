@@ -690,41 +690,38 @@ The buyer pays premium P for the right to buy up to Q pubA in
 exchange of pubB at price X before expiry Exp.
 
 First the sub-transactions that contains all these terms is created
-(but not signed):
+(but not signed).
+
+Option sub-transaction:
 
 #+BEGIN_SRC bitcoin
-input: Q pubA
-output: Q * X pubB
+input: Q pubA (script1)
+output: Q * X pubB to <seller1 pkh>
 expiry: Exp
 #+END_SRC
 
-The input script (script1) uses p2sh and works like this:
-
-#+BEGIN_SRC python
-if (block_time < exp):
-   buyer1 signs
-else
-   seller1 signs
-#+END_SRC
-
-Using bitcoin scripts:
+The output script in the input (script1) uses p2sh and looks like this:
 
 #+BEGIN_SRC bitcoin
+if (block_time < exp)
+   <buyer1 pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
+else
+   <seller2 pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
 #+END_SRC
 
 The buyer signs the following sub-transaction:
 
 #+BEGIN_SRC bitcoin
 input: P pubB
-output: Q pubA to script1
+output: Q pubA to <script1 hash>
 expiry: Exp2
 #+END_SRC
 
-The seller completes and broadcast the transaction adding:
+The seller broadcast this last sub-transactions after completing it with:
 
 #+BEGIN_SRC bitcoin
 input: Q pubA
-output: P pubB to seller2
+output: P pubB to <seller3 pkh>
 #+END_SRC
 
 When this transaction gets into the chain, the contract is complete,
@@ -732,7 +729,19 @@ the premium payment to the seller is final and the buyer can securely
 exercise his right to buy pubA with pubB at the specified price,
 because the seller cannot double-spend the funds in script1 until
 Exp, which cancels the option subtransaction.
-Exp2 must be earlier than Exp.
+
+Exp2 must be earlier than Exp to protect the seller from DoS attacks
+from fake buyers.
+
+The payer could at any moment before Exp complete the option sub-transaction with:
+
+#+BEGIN_SRC bitcoin
+input: Q pubB * X
+output: Q pubA to <buyer2 pkh>
+#+END_SRC
+
+In fact, the option subtransaction could have granularity allowing
+the buyer to buy portions of Q.
 
 *** Short Call
 
