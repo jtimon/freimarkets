@@ -769,7 +769,7 @@ option transaction:
 
 #+BEGIN_SRC bitcoin
 input: -
-output: P pubB to <seller4 pkh>
+output: P pubB to <seller2 pkh>
 scriptValidSig: <seller's full secret>
 #+END_SRC
 
