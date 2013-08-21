@@ -748,11 +748,7 @@ output: Q * X pubB to <seller1 pkh>
 expiry: Exp
 scriptValidPubKey:
   OP_HASH160 <seller's secret hash> OP_EQUALVERIFY
-AND
-  if (block_time < exp)
-    <buyer1 pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
-  else
-    <seller3 pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
+  <buyer1 pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
 #+END_SRC
 
 The buyer only lacks the seller's secret to be able to exercise the
