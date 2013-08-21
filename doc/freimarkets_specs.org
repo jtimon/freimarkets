@@ -352,31 +352,62 @@ a token bitstring taking the remaining bytes. The =scriptPubKey= is
 retrieved from the unspent transaction output containing the
 identified authorizing token.
 
-** TODO [3/5] New scripting opcodes
+** REVIEW [2/2] New scripting opcodes
 
 Several new scripting language opcodes are added by this proposal.
 Their behavior are detailed here.
 
-*** DONE =BLOCK_HEIGHT= and =BLOCK_TIME=
+*** =BLOCK_HEIGHT= and =BLOCK_TIME=
 
 These opcodes push the height of the block containing the current
 frame, or its =nTime= value onto the stack.
 
-*** DONE =DELEGATION_SEPARATOR=
+*** =DELEGATION_SEPARATOR=
 
 The =DELEGATION_SEPARATOR= opcode is a =NOP= during execution, but
 does affect signature operations. During signature hash serialization
 for any script /except/ the one being executed, all code prior to and
 including the =DELEGATION_SEPARATOR= is omitted.
 
-*** DONE =QUANTITY=
+*** =QUANTITY=
 
 The new =QUANTITY= opcode pushes the =nQuantity= value of the current
 frame onto the stack, or 1 if the current frame is a block-level
 transaction.
 
-*** TODO =OUT_EXISTS=
-*** TODO =OUT_SPENT=
+*** REVIEW =OUT_SPENT=
+
+#+BEGIN_SRC bitcoin
+<tx_id> <output number> <chain_id> <height> OP_OUT_SPENT
+#+END_SRC
+
+Returns 0 if one of the following conditions is true:
+
+1) The chain identified by <chain_id> (the hash of the chain's genesis
+   block) is not part of the set of chains observed by the chain for
+   which the script is being validated.
+
+2) The output identified by <tx_id>:<output number> still exists in the UTXO of <chain_id> at block height <height>.
+
+Returns 1 otherwise.
+
+*** REVIEW =OUT_EXISTS=
+#+BEGIN_SRC bitcoin
+<amount> <scriptPubKeyHash> <asset_id> <chain_id> <from> <to> OP_OUT_EXISTS
+#+END_SRC
+
+Returns 0 if one of the following conditions is true:
+
+1) The chain identified by <chain_id> (the hash of the chain's genesis
+   block) is not part of the set of chains observed by the chain for
+   which the script is being validated.
+
+2) There's no output in <chain_id> from block height <from> to block
+   height <to> that matches the <asset_id>, <amount> and a
+   =scriptPubKey= that hashes to <scriptPubKeyHash>.
+
+Returns 1 otherwise.
+
 ** Transaction expiration
 
 =nExpireTime= works in a very similar way than =nLockTime=, mandating
