@@ -13,8 +13,7 @@
 #+LATEX_HEADER: \usepackage{hyperref}
 #+LATEX_HEADER: \usepackage{import}
 #+LATEX_HEADER: \hypersetup{colorlinks,citecolor=green,filecolor=black,linkcolor=blue,urlcolor=blue}
-#+OPTIONS:     toc:nil H:5
-#+BIND: org-export-latex-title-command ""
+#+OPTIONS:   H:2
 
 #+TODO: TODO MODIFY DELETE | REVIEW DONE
 
