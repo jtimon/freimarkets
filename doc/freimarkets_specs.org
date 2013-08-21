@@ -583,11 +583,10 @@ by using the protocol extensions.
 ** MODIFY [0/3] Basic uses
 *** MODIFY Double auction (market/exchange)
 
-This is a generalization of the multi-item English auction. For any asset pairing, an out-of-chain mechanism exists for constructing, sharing, and collecting signed offers of the following forms:
-
-#+BEGIN_SRC bitcoin
-
-#+END_SRC
+This is a generalization of the multi-item English auction (which is
+basically a regular market). For any asset pairing, an out-of-chain
+mechanism exists for constructing, sharing, and collecting signed
+offers of the following forms:
 
 #+BEGIN_SRC bitcoin
     in: <assetA:1A>
@@ -599,8 +598,11 @@ This is a generalization of the multi-item English auction. For any asset pairin
     granularity: M
 #+END_SRC
 
-
-The first offer is a bid of assetA for assetB at a price of 1B/1A. The second offer is the corresponding ask: assetB for assetA at a price of 2B/2A. So long as the bid price is greater than the ask price, it is possible for anyone to combine these two offers together to yield a composite market transaction:
+The first offer is a bid of assetA for assetB at a price of 1B/1A. The
+second offer is the corresponding ask: assetB for assetA at a price of
+2B/2A. So long as the bid price is greater than the ask price, it is
+possible for anyone to combine these two offers together to yield a
+composite market transaction:
 
 #+BEGIN_SRC bitcoin
     sub-txns: <bid, quantity n<=N>
@@ -608,20 +610,38 @@ The first offer is a bid of assetA for assetB at a price of 1B/1A. The second of
     fee: <bid - ask, fee to miner>
 #+END_SRC
 
+The use of granularity and quantity allow fractional parts of each
+offer to be claimed, since in general there is no expectation that the
+offers
 
-The use of granularity and quantity allow fractional parts of each offer to be claimed, since in general there is no expectation that the offers
-
-Note that although the crossover spread could be claimed as an output, anyone else could take the bids and construct their own matching transaction and claim the fee for their own. We assume that miners will know how to do this, and one way or another the fee is ultimately claimed by them. Market clearing becomes a profitable source of revenue in addition to payment transaction fees.
+Note that although the crossover spread could be claimed as an output,
+anyone else could take the bids and construct their own matching
+transaction and claim the fee for their own. We assume that miners
+will know how to do this, and one way or another the fee is ultimately
+claimed by them. Market clearing becomes a profitable source of
+revenue in addition to payment transaction fees.
 
 *** MODIFY Transitive trust relationships
 
-By issuing assets representing IOU debts and signing outstanding offers representing lines of credit, standard marketplace mechanisms can be used to execute payments through networks of transitive trust relationships. These payments look just like the double-auction marketplace transactions covered above, except that they typically involve 3 or more asset types.
+By issuing assets representing IOU debts and signing outstanding
+offers representing lines of credit, standard marketplace mechanisms
+can be used to execute payments through networks of transitive trust
+relationships. These payments look just like the double-auction
+marketplace transactions covered above, except that they typically
+involve 3 or more asset types.
 
 *** MODIFY Baskets currencies and gateways
 
-A /basket currency/ can be issued and fully managed within the block chain. The basket manager issues asset value and then offers it in bidirectional exchange for multiple other assets at a fixed rate.
+A /basket currency/ can be issued and fully managed within the block
+chain. The basket manager issues asset value and then offers it in
+bidirectional exchange for multiple other assets at a fixed rate.
 
-Gateways are similar to basket currencies: an issuer creates an asset and then distributes it when funds are received out-of-protocol. This could be in the form of a fiat wire transfer, physical deposit of precious metals, or a cross-chain transaction (atomically swapping bitcoin for freicoin, for example). Assets are redeemed by a similar process in reverse.
+Gateways are similar to basket currencies: an issuer creates an asset
+and then distributes it when funds are received out-of-protocol. This
+could be in the form of a fiat wire transfer, physical deposit of
+precious metals, or a cross-chain transaction (atomically swapping
+bitcoin for freicoin, for example). Assets are redeemed by a similar
+process in reverse.
 
 ** MODIFY Auctions
 *** MODIFY English Auction
