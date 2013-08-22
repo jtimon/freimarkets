@@ -1,4 +1,5 @@
-#+TITLE: FreiMarkets: assets, p2p exchange and off-chain transactions
+#+TITLE: \LARGE{\bf FreiMarkets: assets, p2p exchange and off-chain transactions} \linebreak \linebreak \linebreak \Small{Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomic trades, auctions, options and transitive transactions to Freicoin} \linebreak \linebreak \small{Doc v0.0.1}
+
 #+AUTHOR: Mark Friedenbach, Jorge Timón
 #+EMAIL: mark@monetize.io, jtimon@monetize.io
 #+KEYWORDS: p2p exchange, crypto-assets, crypto-credit, smart property, colored coins, ripple, off-chain transactions, cross-chain trade
@@ -16,10 +17,6 @@
 #+OPTIONS:   H:2
 
 #+TODO: TODO MODIFY DELETE | REVIEW DONE
-
-Adding arbitrary, user-specified bearer instruments, off-chain
-accounting, atomic trades, auctions, and transitive transactions to
-Freicoin
 
 * Introduction
 
@@ -1071,8 +1068,8 @@ Ant-Money laundering enforcement. For example, usd gateways based on
 the US need to comply with [[http://fincen.gov/statutes_regs/guidance/html/FIN-2013-G001.html][FinCEN's normative]].
 
 [fn:mdc] At least this two threads describe this cross-chain trade
-scheme: https://bitcointalk.org/index.php?topic=31643.0
-https://bitcointalk.org/index.php?topic=91843.0
+scheme: \newline https://bitcointalk.org/index.php?topic=31643.0
+\newline https://bitcointalk.org/index.php?topic=91843.0
 
 [fn:coinbase] This is in contrast to regular coinbase transactions
 which do not currently allow extra inputs.
