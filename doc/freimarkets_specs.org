@@ -250,7 +250,9 @@ would be trivial to implement with this protocol extension.
 \newpage
 * Proposed changes
 
-** Unlimited-precision fractional arithmetic
+** Precision and rounding
+
+*** Unlimited-precision fractional arithmetic
 
 All internal computation of accounting quantities are performed using
 arbitrary precision fractions, or an equivalent mathematical system
@@ -264,7 +266,7 @@ intermediary value of any asset type is 2^53 - 1 kria, or
 value representable in the =decimal64= type. A transaction which
 violates this constraint is invalid.
 
-** IEEE 754-2008 decimal floating point
+*** IEEE 754-2008 decimal floating point
 
 Output amounts for ~nVersion=3~ transactions are positive, real
 decimal floating point values using a stricter subset of the binary
@@ -287,6 +289,24 @@ kria (0.00000001 freicoins) would be encoded as a new-style
 approximately 768 orders of magnitude in the exponent, plus sixteen
 digits of precision. While not technically providing infinite
 divisibility, there is plenty of room at the bottom.
+
+*** A note on units
+
+Throughout this document a couple of differing units are used for
+describing financial quantities on the Freicoin block chain. This
+unfortunate confusing situation arises from the history of
+representing bitcoin/freicoin amounts both in user interface and
+serialization formats.
+
+When talking about the host currency we speak of freicoins, with 1
+freicoin (1 frc) traditionally being specified with 8 decimal places
+of precision. In old-style transactions the smallest non-zero
+representable unit of freicoins is 1 kria, with 100,000,000 kria = 1
+frc. New-style transactions encode freicoin quantities as =decimal64=
+values, with 1 kria = 10^369, and the smallest non-zero representable
+unit being 10^{-398} or 10^{-775} frc. In either case, it is expected
+that the user interface will be configured to show units of freicoins,
+or the multiplier of the underlying asset, if specified.
 
 ** Indivisible tokens
 
