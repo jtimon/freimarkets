@@ -1,10 +1,9 @@
-#+TITLE: \LARGE{\bf FreiMarkets: assets, p2p exchange and off-chain transactions} \linebreak \linebreak \linebreak \Small{Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomic trades, auctions, options and transitive transactions to Freicoin} \linebreak \linebreak \small{Doc v0.0.1}
+#+TITLE: \LARGE{\bf FreiMarkets: assets, p2p exchange and off-chain transactions} \linebreak \linebreak \linebreak \linebreak \linebreak \small{Doc v0.0.1}
 
 #+AUTHOR: Mark Friedenbach, Jorge Timón
 #+EMAIL: mark@monetize.io, jtimon@monetize.io
 #+KEYWORDS: p2p exchange, crypto-assets, crypto-credit, smart property, colored coins, ripple, off-chain transactions, cross-chain trade
 #+LANGUAGE: en
-#+LaTeX_CLASS: article
 #+LATEX_HEADER: \usepackage[T1]{fontenc}
 #+LATEX_HEADER: \usepackage[margin=2.5cm,includefoot]{geometry}
 #+LATEX_HEADER: \usepackage{graphicx}
@@ -14,9 +13,27 @@
 #+LATEX_HEADER: \usepackage{hyperref}
 #+LATEX_HEADER: \usepackage{import}
 #+LATEX_HEADER: \hypersetup{colorlinks,citecolor=green,filecolor=black,linkcolor=blue,urlcolor=blue}
-#+OPTIONS:   H:2
+#+LATEX_HEADER: \setcounter{secnumdepth}{5}
+#+LATEX_HEADER: \setcounter{tocdepth}{2}
+#+OPTIONS:   toc:nil H:5
 
 #+TODO: TODO MODIFY DELETE | REVIEW DONE
+
+#+begin_latex
+\begin{abstract}
+
+Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomic trades, auctions, options and transitive transactions to Freicoin
+\\\\
+
+\textbf{Keywords:} Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomic trades, auctions, options and transitive transactions 
+\end{abstract}
+
+\newpage
+
+\tableofcontents
+
+\newpage
+#+end_latex
 
 * Introduction
 
