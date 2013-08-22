@@ -288,7 +288,7 @@ kria (0.00000001 freicoins) would be encoded as a new-style
 =decimal64= value is 10^{-398}, that gives an expressive range of
 approximately 768 orders of magnitude in the exponent, plus sixteen
 digits of precision. While not technically providing infinite
-divisibility, there is plenty of room at the bottom.
+divisibility, this leaves plenty of room at the bottom.
 
 *** A note on units
 
