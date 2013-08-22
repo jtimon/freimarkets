@@ -279,7 +279,7 @@ the following equation:
 #+BEGIN_SRC bitcoin
     nValue :: int64
     dValue :: decimal64
-    dValue = nValue * 10369
+    dValue = nValue * 10^369
 #+END_SRC
 
 That is to say, an old-style minimum representable positive value of 1
