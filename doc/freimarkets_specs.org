@@ -417,7 +417,7 @@ described in section \ref{freiExtOpcodes}.
 **** =OUTPUT_SPENT=
 
 #+BEGIN_SRC bitcoin
-<chain_id> <tx_id> <output number> <height> OUTPUT_SPENT
+<tx_id> <output number> <height> <chain_id> OUTPUT_SPENT
 #+END_SRC
 
 Throws an error (abnormally terminating script execution) if the
@@ -437,7 +437,7 @@ Returns 1 otherwise.
 **** =OUTPUT_EXISTS=
 
 #+BEGIN_SRC bitcoin
-<chain_id> <from> <to> <asset_id> <scriptPubKey> <tokens> <refheight> <amount> OUTPUT_EXISTS
+<refheight> <amount> <tokens> <scriptPubKey> <to> <from> <asset_id> <chain_id> OUTPUT_EXISTS
 #+END_SRC
 
 Throws an error (abnormally terminating script execution) if any of
@@ -477,7 +477,7 @@ use of the generic ones will result in the script being invalid.
 It is almost equivalent to the following script:
 
 #+BEGIN_SRC bitcoin
-<tx_id> <output number> <freicoin chain_id> BLOCK_HEIGHT OUTPUT_SPENT
+<tx_id> <output number> BLOCK_HEIGHT FRC_CHAIN_ID OUTPUT_SPENT
 #+END_SRC
 
 The difference being that during execution the unspent transaction
@@ -489,13 +489,13 @@ excluding transactions which come later.
 ***** =OUTPUT_EXISTS_IN=
 
 #+BEGIN_SRC bitcoin
-<asset_id> <scriptPubKey> <tokens> <refheight> <amount> OUTPUT_EXISTS_IN
+<refheight> <amount> <tokens> <scriptPubKey> <asset_id> OUTPUT_EXISTS_IN
 #+END_SRC
 
 It is almost equivalent to the following script:
 
 #+BEGIN_SRC bitcoin
-FRC_CHAIN_ID BLOCK_HEIGHT BLOCK_HEIGHT <asset_id> <scriptPubKey> <tokens> <refheight> <amount> OUTPUT_EXISTS
+<refheight> <amount> <tokens> <scriptPubKey> BLOCK_HEIGHT BLOCK_HEIGHT <asset_id> FRC_CHAIN_ID OUTPUT_EXISTS
 #+END_SRC
 
 Again this will only make nodes look for outputs that are in the utxo
