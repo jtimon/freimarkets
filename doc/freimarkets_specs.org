@@ -810,18 +810,11 @@ representing bitcoin IOUs. For simplicity we use public assets and
 bitcoins over freicoins to avoid complicating the example with
 cross-chain trade and demurrage.
 
-*** MODIFY Baskets currencies and gateways
+*** MODIFY Baskets currencies
 
 A /basket currency/ can be issued and fully managed within the block
 chain. The basket manager issues asset value and then offers it in
 bidirectional exchange for multiple other assets at a fixed rate.
-
-Gateways are similar to basket currencies: an issuer creates an asset
-and then distributes it when funds are received out-of-protocol. This
-could be in the form of a fiat wire transfer, physical deposit of
-precious metals, or a cross-chain transaction (atomically swapping
-bitcoin for freicoin, for example). Assets are redeemed by a similar
-process in reverse.
 
 ** [0/4] Auctions
 
@@ -1030,6 +1023,14 @@ call seller is the long put buyer.
 
 The buyer of a long put is taking the short put position.
 ** TODO Gateways and Bridges
+
+Gateways are similar to basket currencies: an issuer creates an asset
+and then distributes it when funds are received out-of-protocol. This
+could be in the form of a fiat wire transfer, physical deposit of
+precious metals, or a cross-chain transaction (atomically swapping
+bitcoin for freicoin, for example). Assets are redeemed by a similar
+process in reverse.
+
 ** MODIFY [0/6] Off-chain transactions
 
 For ultimate privacy and scalability, off-chain accounting services
