@@ -97,8 +97,8 @@ Together this enables the following sorts of applications:
 
 - Execute an arbitrary number of trades from different accounting
   servers and/or the public chain in an atomic transaction, using
-  either the public chain or an agreed upon centralized timestamping
-  service for the commit phase.
+  either the public chain or an agreed upon timestamping service for
+  the commit phase.
 
 - Public chains or private accounting servers configured to “observe”
   other chains to enable much faster but secure cross-chain trade,
