@@ -222,7 +222,7 @@ dependent on external chains, it is possible for private transactions
 to be conditional on public Freicoin blockchain data or other private
 accounting servers.
 
-Note that the opposite relation cannot apply at this time.. Public
+Note that the opposite relation cannot apply at this time. Public
 chains could support transactions conditional to data on other chains
 to enhance cross-chain trade, but then the observing chain’s
 validation becomes dependent on the observed chain validation. This
