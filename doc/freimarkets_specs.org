@@ -1308,7 +1308,7 @@ work on these improvements is documented here: http://utxo.tumblr.com/
 
 [fn:kyc] Issuers of currencies convertible to fiat may have to comply
 with know your customer regulations in their jurisdiction for
-Ant-Money laundering enforcement. For example, U.S. dollar gateways
+anti-money laundering enforcement. For example, U.S. dollar gateways
 based in the USA need to comply with [[http://fincen.gov/statutes_regs/guidance/html/FIN-2013-G001.html][FinCEN's normative]].
 
 [fn:mdc] At least these two threads describe this cross-chain trade
