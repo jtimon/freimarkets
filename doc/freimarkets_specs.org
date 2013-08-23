@@ -194,6 +194,11 @@ broadcast through a side-channel and aggregated by miners. When a
 cross-over is detected (a bid higher than an ask), the miner combines
 the two pre-signed offers and claims the difference as a fee.
 
+Other use cases are enabled. For example, when the underlying assets
+represent lines of credit, the exchange mechanism allows payments
+based on transitive trust relationships, in the style of the original
+Ripplepay application by Ryan Fugger.
+
 ** Private ledgers
 
 Private accounting servers, or “accountants” use a variant of the
