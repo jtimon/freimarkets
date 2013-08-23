@@ -22,10 +22,10 @@
 #+begin_latex
 \begin{abstract}
 
-Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomic trades, auctions, options and transitive transactions to Freicoin
+Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomic trades, auctions, derivatives and transitive transactions to Freicoin
 \\\\
 
-\textbf{Keywords:} Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomic trades, auctions, options and transitive transactions 
+\textbf{Keywords:} Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomic trades, auctions, derivatives and transitive transactions 
 \end{abstract}
 
 \newpage
