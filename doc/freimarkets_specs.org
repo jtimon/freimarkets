@@ -75,7 +75,7 @@ Together this enables the following sorts of applications:
 
 - Executing an arbitrary number of these orders atomically by creating
   a complete valid transaction where the orders are included as nested
-  sub-transactions, thereby executing an atomic trade without
+  /sub-transactions/, thereby executing an atomic trade without
   requiring each of the parties to be online or in direct
   communication with each other. Composing orders from separate
   markets into an atomic trade with intermediate assets enables
@@ -85,7 +85,7 @@ Together this enables the following sorts of applications:
   special class of non-spendable, prunable output script.
 
 - Restricting the conditions by which a transaction or sub-transaction
-  may be selected for inclusion by specifying validation scripts,
+  may be selected for inclusion by specifying /validation scripts/,
   which are run when the enclosing block is validated. Introspection
   of the block chain from within the bitcoin scripting environment is
   enabled by the introduction of new opcodes.
