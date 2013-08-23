@@ -437,7 +437,7 @@ Returns 1 otherwise.
 **** =OUTPUT_EXISTS=
 
 #+BEGIN_SRC bitcoin
-<refheight> <amount> <tokens> <scriptPubKey> <to> <from> <asset_id> <chain_id> OUTPUT_EXISTS
+<refheight> <amount> <tokens> <scriptPubKey> <chain_id> <asset_id> <from> <to> OUTPUT_EXISTS
 #+END_SRC
 
 Throws an error (abnormally terminating script execution) if any of
@@ -495,7 +495,7 @@ excluding transactions which come later.
 It is almost equivalent to the following script:
 
 #+BEGIN_SRC bitcoin
-<refheight> <amount> <tokens> <scriptPubKey> BLOCK_HEIGHT BLOCK_HEIGHT <asset_id> FRC_CHAIN_ID OUTPUT_EXISTS
+<refheight> <amount> <tokens> <scriptPubKey> FRC_CHAIN_ID <asset_id> BLOCK_HEIGHT BLOCK_HEIGHT OUTPUT_EXISTS
 #+END_SRC
 
 Again this will only make nodes look for outputs that are in the utxo
@@ -1054,10 +1054,10 @@ output: -
 granularity: 4
 validation scriptPubKey:
     DELEGATION_SEPARATOR DUP HASH160 <accountantB_pkh> EQUALVERIFY CHECKSIGVERIFY
-    FROMALTSTACK(refheight)
+    FROMALTSTACK(refheight) DUP 8000 EQUALVERIFY
     FROMALTSTACK(amount) DUP 25 DIV QUANTITY EQUALVERIFY
-    FROMALTSTACK(tokens)
-    FROMALTSTACK(from) FROMALTSTACK(to) seller1 pubA OUTPUT_EXISTS
+    FROMALTSTACK(tokens) DUP 0 EQUALVERIFY
+    seller1 FRC_CHAIN_ID pubA FROMALTSTACK(from) FROMALTSTACK(to) OUTPUT_EXISTS
 #+END_SRC
 
 ...and signs the partial transaction.
@@ -1074,12 +1074,6 @@ in the stack. Whoever appears in =CHECKSIGVERIFY= (in this case
 accountantB) must sign the full transaction with the complete
 validation script, including what's before =DELEGATION_SEPARATOR=.
 
-Note also that the output refers to an external asset (FRC:pubA)
-accountantB has no control over. It is ignored for validation purposes
-and is only used to specify the exchange rate. If the accountant
-cheats the user with the exchange rate, there will be a proof of
-fraud.
-
 The payer (who just wants 50 privB) completes the private transaction
 with:
 
@@ -1094,6 +1088,7 @@ The buyer also creates the public transaction:
 input: 50 pubA
 output: 50 pubA to seller1
 expiry: 10000
+refheight: 8000
 #+END_SRC
 
 ...but doesn't sign it. It sends both complete but not signed
@@ -1101,7 +1096,11 @@ transactions to the accountant who reads them and completes the
 private validation scriptPubKey with:
 
 #+BEGIN_SRC bitcoin
-50 TOALTSTACK 10000 TOALTSTACK
+10000 TOALTSTACK(to)
+0     TOALTSTACK(from)
+0     TOALTSTACK(tokens)
+50    TOALTSTACK(amount)
+8000  TOALTSTACK(refheight)
 #+END_SRC
 
 Finally accountantB signs it all and fills the sub-tx validation
@@ -1111,14 +1110,22 @@ scriptSig with:
 <accountantB_sig> <accountantB_pk>
 #+END_SRC
 
-If you put the full script ordered together to validate by the script
-interpreter you have:
+Before validation the =scriptValidSig= and =scriptValidPubKey= are
+combined together to yield:
 
 #+BEGIN_SRC bitcoin
 <accountantB_sig> <accountantB_pk>
-50 TOALTSTACK 10000 TOALTSTACK
-DELEGATION_SEPARATOR DUP HASH160 <accountantB_pkh> EQUALVERIFY CHECKSIGVERIFY
-FROMALTSTACK FROMALTSTACK seller1 pubA FRC_CHAIN_ID OUTPUT_EXISTS_BEFORE
+10000 TOALTSTACK(to)
+0     TOALTSTACK(from)
+0     TOALTSTACK(tokens)
+50    TOALTSTACK(amount)
+8000  TOALTSTACK(refheight)
+DELEGATION_SEPARATOR
+DUP HASH160 <accountantB_pkh> EQUALVERIFY CHECKSIGVERIFY
+FROMALTSTACK(refheight) DUP 8000 EQUALVERIFY
+FROMALTSTACK(amount) DUP 25 DIV QUANTITY EQUALVERIFY
+FROMALTSTACK(tokens) DUP 0 EQUALVERIFY
+seller1 FRC_CHAIN_ID pubA FROMALTSTACK(from) FROMALTSTACK(to) OUTPUT_EXISTS
 #+END_SRC
 
 Now if buyer1 signs the public transaction and it gets into the FRC
@@ -1135,7 +1142,8 @@ The seller constructs the public order:
 input: 100 pubB
 output: 100 accountantA:privA to seller1
 validation scriptPubKey:
-    DELEGATION_SEPARATOR DUP HASH160 <accountantA_pkh> EQUALVERIFY CHECKSIGVERIFY
+    DELEGATION_SEPARATOR
+    DUP HASH160 <accountantA_pkh> EQUALVERIFY CHECKSIGVERIFY
 #+END_SRC
 
 ...and signs the partial transaction.
@@ -1155,7 +1163,7 @@ The buyer also creates the private transaction:
 input: 50 privA
 output: 50 privA to seller1
 validation scriptPubKey:
-    10000 50 buyer1 pubB FRC_CHAIN_ID OUTPUT_EXISTS_BEFORE
+    0 50 0 buyer1 0 10000 pubB FRC_CHAIN_ID OUTPUT_EXISTS
 #+END_SRC
 
 The buyer signs the private transaction and sends it with the public
@@ -1184,19 +1192,24 @@ output: 100 pubA to userB
 
 #+BEGIN_SRC bitcoin
 input: 100 privC
-output: 100 FRC:pubB to userC
+output: [100 FRC:pubB to userC]
 validation scriptPubKey:
-    DELEGATION_SEPARATOR DUP HASH160 <accountantC_pkh> EQUALVERIFY CHECKSIGVERIFY
-    FROMALTSTACK (expiry) FROMALTSTACK (amount) userC pubB FRC_CHAIN_ID OUTPUT_EXISTS_BEFORE
+    DELEGATION_SEPARATOR
+    DUP HASH160 <accountantC_pkh> EQUALVERIFY CHECKSIGVERIFY
+    FROMALTSTACK(refheight) DUP 0 EQUALVERIFY
+    FROMALTSTACK(amount) DUP 100 EQUALVERIFY
+    FROMALTSTACK(tokens) DUP 0 EQUALVERIFY
+    userC FRC_CHAIN_ID pubB FROMALTSTACK(from) FROMALTSTACK(to) OUTPUT_EXISTS
 #+END_SRC
 
    3 ) Private for private:
 
 #+BEGIN_SRC bitcoin
 input: 100 privD
-output: 100 accC:privC to userD
+output: [100 accC:privC to userD]
 validation scriptPubKey:
-    DELEGATION_SEPARATOR DUP HASH160 <accountantC_pkh> EQUALVERIFY CHECKSIGVERIFY
+    DELEGATION_SEPARATOR
+    DUP HASH160 <accountantC_pkh> EQUALVERIFY CHECKSIGVERIFY
     DUP HASH160 <accountantD_pkh> EQUALVERIFY CHECKSIGVERIFY
 #+END_SRC
 
@@ -1204,7 +1217,7 @@ validation scriptPubKey:
 
 #+BEGIN_SRC bitcoin
 input: 100 pubE
-output: 100 accD:privD to userE
+output: [100 accD:privD to userE]
 validation scriptPubKey:
     DUP HASH160 <accountantD_pkh> EQUALVERIFY CHECKSIGVERIFY
 #+END_SRC
@@ -1244,7 +1257,7 @@ The other private transaction (priv_tx_2) is built using offer 3:
 input: -
 output: 50 privD to userE
 validation scriptPubKey:
-    10000 50 userC pubB FRC_CHAIN_ID OUTPUT_EXISTS_BEFORE
+    0 50 0 userC 0 10000 pubB FRC_CHAIN_ID OUTPUT_EXISTS
 #+END_SRC
 
 Offer 3 doesn't require any completion for its validation
