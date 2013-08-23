@@ -683,12 +683,12 @@ from ordinary transaction types:
   defined take effect /after/ the asset definition transaction).
 
 \newpage
-* [1/4] Example use cases and Bitcoin scripts
+* [1/3] Example use cases and Bitcoin scripts
 
 Here we expand the set of possible Bitcoin contracts [fn:contracts]
 by using the protocol extensions.
 
-** MODIFY [0/2] Basic uses
+** [0/2] Basic uses
 *** General notation conventions
 
 The following examples will use a summarized notation for
@@ -781,7 +781,6 @@ can be used to execute payments through networks of transitive trust
 relationships. These payments look just like the double-auction
 marketplace transactions covered above, except that they typically
 involve 3 or more asset types.
-
 *** MODIFY Baskets currencies and gateways
 
 A /basket currency/ can be issued and fully managed within the block
@@ -891,6 +890,9 @@ Vickrey second-price auction in a trust-free manor. There are,
 however, implementable cryptographic protocols for doing so
 out-of-protocol using homomorphic encryption.
 
+** [0/2] Basic financial use cases
+*** TODO p2p lending
+*** TODO Stocks and dividend payments
 ** REVIEW Options
 
 Options[fn:options] are financial instruments typically used to
@@ -965,6 +967,7 @@ call seller is the long put buyer.
 *** Short Put
 
 The buyer of a long put is taking the short put position.
+** TODO Gateways and Bridges
 ** MODIFY [0/6] Off-chain transactions
 
 For ultimate privacy and scalability, off-chain accounting services
