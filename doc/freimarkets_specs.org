@@ -1311,7 +1311,7 @@ with know your customer regulations in their jurisdiction for
 Ant-Money laundering enforcement. For example, usd gateways based on
 the US need to comply with [[http://fincen.gov/statutes_regs/guidance/html/FIN-2013-G001.html][FinCEN's normative]].
 
-[fn:mdc] At least this two threads describe this cross-chain trade
+[fn:mdc] At least these two threads describe this cross-chain trade
 scheme: \newline https://bitcointalk.org/index.php?topic=31643.0
 \newline https://bitcointalk.org/index.php?topic=91843.0
 
