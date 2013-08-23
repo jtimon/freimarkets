@@ -688,46 +688,90 @@ from ordinary transaction types:
 Here we expand the set of possible Bitcoin contracts [fn:contracts]
 by using the protocol extensions.
 
-** MODIFY [0/3] Basic uses
-*** MODIFY Double auction (market/exchange)
+** MODIFY [0/2] Basic uses
+*** General notation conventions
 
-This is a generalization of the multi-item English auction (which is
-basically a regular market). For any asset pairing, an out-of-chain
-mechanism exists for constructing, sharing, and collecting signed
-offers of the following forms:
-
-#+BEGIN_SRC bitcoin
-    in: <assetA:1A>
-    out: <assetB:1B, to person constructing offer>
-    granularity: N
-
-    in: <assetB:2B>
-    out: <assetA:2A, to person constructing offer>
-    granularity: M
-#+END_SRC
-
-The first offer is a bid of assetA for assetB at a price of 1B/1A. The
-second offer is the corresponding ask: assetB for assetA at a price of
-2B/2A. So long as the bid price is greater than the ask price, it is
-possible for anyone to combine these two offers together to yield a
-composite market transaction:
+The following examples will use a summarized notation for
+transactions that doesn't represent accurately the actual serialized
+format and may lead to confusion. For example, the transaction:
 
 #+BEGIN_SRC bitcoin
-    sub-txns: <bid, quantity n<=N>
-              <ask, quantity m<=M>
-    fee: <bid - ask, fee to miner>
+    in: 100 FRC
+    out: 100 FRC to Alice
 #+END_SRC
 
-The use of granularity and quantity allow fractional parts of each
-offer to be claimed, since in general there is no expectation that the
-offers
+Means that the payer (a general term for the user building the final
+transaction, regardless of it being an actual payment or a trade
+execution) puts in the input a tx_id and an output that point to an
+output he controls and contains 100 unspent FRC.
 
-Note that although the crossover spread could be claimed as an output,
-anyone else could take the bids and construct their own matching
-transaction and claim the fee for their own. We assume that miners
-will know how to do this, and one way or another the fee is ultimately
-claimed by them. Market clearing becomes a profitable source of
-revenue in addition to payment transaction fees.
+Alice1, alice2, alice3, etc. are all addresses or script hashes (p2sh)
+that Alice controls. PubA, pubB, pubC, etc. Are there custom assets
+issued in the public chain. PrivA, privB, privC are all private
+assets managed outside the public chain, if nothing is said, it is
+assume that they're issued in different servers. If it needs to be
+clarified, a label for the chain will be prefixed as follows: 
+frc_chain:FRC, frc_chain:pubA, chainB:pubB, accountantC:privC,
+accountantD:privD, etc. 
+
+*** p2p exchange
+
+Sub-transactions enable the creation of partially valid transactions
+that act like open binding orders that wait outside of the chain.
+For example, considering this offer1 created by Alice:
+
+#+BEGIN_SRC bitcoin
+    in: 50 pubA
+    out: 100 pubB to alice1
+    granularity: 10
+#+END_SRC
+
+The price is here 2 pubB for each pubA, and the offer can be divided
+in smaller pieces of 10 pubB for each 5 pubA, as specified by
+granularity 10.
+
+While the 100 pubA remain in the UTXO set, anyone can use this
+sub-transaction in a full valid transaction. Bob buys 10 of those
+pubA by broadcasting this transaction:
+
+
+#+BEGIN_SRC bitcoin
+    sub-txns: <2, offer1>
+    in: 20 pubB
+    out: 10 pubA to bob1
+#+END_SRC
+
+Since the nQuantity specified for offer1 is 2, he has to put in 20
+pubB and he can claim up to 10 pubA.
+
+Although the sub-transaction has appeared in the chain already, the
+50 pubA referenced in the offer hasn't been fully spent yet, 40 pubA
+remain in the offer. Carol could take 20 more pubA with this
+transaction:
+
+#+BEGIN_SRC bitcoin
+    sub-txns: <4, offer1>
+    in: 40.1 pubB, 0.1 FRC
+    out: 19.99 pubA to carol1
+#+END_SRC
+
+Since Carol has payed more than needed and claimed less than she
+could, the miner gets the 0.1 pubB, 0.1 FRC and 0.01 pubA as fee.
+
+Finally, Alice decides to cancel the offer by just spending the
+remaining 10 pubA still in the utxo set.
+
+#+BEGIN_SRC bitcoin
+    in: tx_id:output where the 50 pubA were originally contained
+    out: 10 pubA to alice2
+#+END_SRC
+
+Since there's not enough funds in the output, any further attempt to
+use offer1 in a transaction will be invalid.
+
+Although in this examples the payers (Bob and Carol) use the orders
+directly and actively, miners can act as exchange engines by pairing
+matching open orders as described in section \ref{doubleAuction}.
 
 *** MODIFY Transitive trust relationships
 
