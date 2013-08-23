@@ -956,8 +956,6 @@ input: script1
 output: Q * X pubB to <seller1 pkh>
 granularity: N
 expiry: Exp
-scriptValidPubKey:
-  OP_DUP OP_HASH160 <buyer1 pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
 #+END_SRC
 
 The buyer only lacks the seller's secret to be able to exercise the
