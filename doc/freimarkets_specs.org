@@ -958,12 +958,12 @@ output: Q pubA to script1
 script1:
 
 #+BEGIN_SRC bitcoin
-if (BLOCK_HEIGHT < Exp)
-  OP_DUP OP_HASH160 <buyer1 pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
-else
- OP_DUP OP_HASH160 <seller1 pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
+IF ( BLOCK_HEIGHT < Exp )
+    DUP HASH160 <buyer1 pkh> EQUALVERIFY CHECKSIGVERIFY
+ELSE
+    DUP HASH160 <seller1 pkh> EQUALVERIFY CHECKSIGVERIFY
 AND
-  OP_HASH160 <seller's secret hash> OP_EQUALVERIFY
+    HASH160 <seller's secret hash> EQUALVERIFY
 #+END_SRC
 
 option sub-transaction sub-tx1:
@@ -985,7 +985,7 @@ output: -
 granularity: 1
 expiry: Exp2
 scriptValidPubKey:
-  OP_HASH160 <seller's secret hash> OP_EQUALVERIFY
+    HASH160 <seller's secret hash> EQUALVERIFY
 #+END_SRC
 
 Finally, the seller completes the buyer's transaction to receive
@@ -1053,8 +1053,10 @@ output: -
 granularity: 4
 validation scriptPubKey:
     DELEGATION_SEPARATOR DUP HASH160 <accountantB_pkh> EQUALVERIFY CHECKSIGVERIFY
-    FROMALTSTACK (amount) DUP 25 DIV QUANTITY EQUALVERIFY
-    FROMALTSTACK (expiry) seller1 pubA FRC_CHAIN_ID OUTPUT_EXISTS
+    FROMALTSTACK(refheight)
+    FROMALTSTACK(amount) DUP 25 DIV QUANTITY EQUALVERIFY
+    FROMALTSTACK(tokens)
+    FROMALTSTACK(from) FROMALTSTACK(to) seller1 pubA OUTPUT_EXISTS
 #+END_SRC
 
 ...and signs the partial transaction.
@@ -1098,7 +1100,7 @@ transactions to the accountant who reads them and completes the
 private validation scriptPubKey with:
 
 #+BEGIN_SRC bitcoin
-50 OP_TOALTSTACK 10000 OP_TOALTSTACK
+50 TOALTSTACK 10000 TOALTSTACK
 #+END_SRC
 
 Finally accountantB signs it all and fills the sub-tx validation
@@ -1113,9 +1115,9 @@ interpreter you have:
 
 #+BEGIN_SRC bitcoin
 <accountantB_sig> <accountantB_pk>
-50 OP_TOALTSTACK 10000 OP_TOALTSTACK
-DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantB_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
-OP_FROMALTSTACK OP_FROMALTSTACK seller1 pubA FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
+50 TOALTSTACK 10000 TOALTSTACK
+DELEGATION_SEPARATOR DUP HASH160 <accountantB_pkh> EQUALVERIFY CHECKSIGVERIFY
+FROMALTSTACK FROMALTSTACK seller1 pubA FRC_CHAIN_ID OUTPUT_EXISTS_BEFORE
 #+END_SRC
 
 Operations in the stack shouldn't be allowed in the validation
@@ -1135,7 +1137,7 @@ The seller constructs the public order:
 input: 100 pubB
 output: 100 accountantA:privA to seller1
 validation scriptPubKey:
-    DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantA_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
+    DELEGATION_SEPARATOR DUP HASH160 <accountantA_pkh> EQUALVERIFY CHECKSIGVERIFY
 #+END_SRC
 
 ...and signs the partial transaction.
@@ -1155,7 +1157,7 @@ The buyer also creates the private transaction:
 input: 50 privA
 output: 50 privA to seller1
 validation scriptPubKey:
-    10000 50 buyer1 pubB FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
+    10000 50 buyer1 pubB FRC_CHAIN_ID OUTPUT_EXISTS_BEFORE
 #+END_SRC
 
 The buyer signs the private transaction and sends it with the public
@@ -1186,8 +1188,8 @@ output: 100 pubA to userB
 input: 100 privC
 output: 100 FRC:pubB to userC
 validation scriptPubKey:
-    DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantC_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
-    OP_FROMALTSTACK (expiry) OP_FROMALTSTACK (amount) userC pubB FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
+    DELEGATION_SEPARATOR DUP HASH160 <accountantC_pkh> EQUALVERIFY CHECKSIGVERIFY
+    FROMALTSTACK (expiry) FROMALTSTACK (amount) userC pubB FRC_CHAIN_ID OUTPUT_EXISTS_BEFORE
 #+END_SRC
 
    3 ) Private for private:
@@ -1196,8 +1198,8 @@ validation scriptPubKey:
 input: 100 privD
 output: 100 accC:privC to userD
 validation scriptPubKey:
-    DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantC_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
-    OP_DUP OP_HASH160 <accountantD_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
+    DELEGATION_SEPARATOR DUP HASH160 <accountantC_pkh> EQUALVERIFY CHECKSIGVERIFY
+    DUP HASH160 <accountantD_pkh> EQUALVERIFY CHECKSIGVERIFY
 #+END_SRC
 
    4 ) Public for private:
@@ -1206,7 +1208,7 @@ validation scriptPubKey:
 input: 100 pubE
 output: 100 accD:privD to userE
 validation scriptPubKey:
-    OP_DUP OP_HASH160 <accountantD_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
+    DUP HASH160 <accountantD_pkh> EQUALVERIFY CHECKSIGVERIFY
 #+END_SRC
 
 The payer (userA) who wants to buy 50 pubE for 50 pubA builds the
@@ -1244,7 +1246,7 @@ The other private transaction (priv_tx_2) is built using offer 3:
 input: -
 output: 50 privD to userE
 validation scriptPubKey:
-    10000 50 userC pubB FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
+    10000 50 userC pubB FRC_CHAIN_ID OUTPUT_EXISTS_BEFORE
 #+END_SRC
 
 Offer 3 doesn't require any completion for its validation
