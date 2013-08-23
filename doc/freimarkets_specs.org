@@ -1,4 +1,4 @@
-#+TITLE: \LARGE{\bf FreiMarkets: assets, p2p exchange and off-chain transactions} \linebreak \linebreak \linebreak \linebreak \linebreak \small{Doc v0.0.1}
+#+TITLE: \LARGE{\bf Freimarkets: assets, p2p exchange and off-chain transactions} \linebreak \linebreak \linebreak \linebreak \linebreak \small{Doc v0.0.1}
 
 #+AUTHOR: Mark Friedenbach, Jorge Timón
 #+EMAIL: mark@monetize.io, jtimon@monetize.io
