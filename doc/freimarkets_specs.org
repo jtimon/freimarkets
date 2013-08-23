@@ -55,10 +55,9 @@ Together this enables the following sorts of applications:
 - Issuing new assets by means of asset definition transactions
   (coinbase transactions other than the usual first transaction of a
   block). Such assets are allowed to specify their own
-  interest/demurrage rate, unit granularity, and display scale. As
-  well as a hash field referencing an external resource, possibly a
-  legal or ricardian contract that the chain itself doesn't have to
-  validate.
+  interest/demurrage rate, unit granularity, display scale, and
+  a hash field referencing an external resource, possibly a legal or
+  Ricardian contract that the chain itself does not validate.
 
 - Issuing unique and indivisible tokens that are transferred in sets
   instead of numeric amount, and allow fast look ups on their current
