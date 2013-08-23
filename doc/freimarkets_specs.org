@@ -448,7 +448,7 @@ the following conditions are true:
   which the script is being validated.
 
 - <tokens> is not a serialized, sorted, non-repeating but possibly
-  empty list of octet strings.
+  empty list of bitstrings.
 
 Returns 0 if the following condition is true:
 
