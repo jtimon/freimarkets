@@ -263,9 +263,9 @@ transactions, the =int64= =nValue= field is interpreted according to
 the following equation:
 
 #+BEGIN_SRC bitcoin
-    nValue :: int64
-    dValue :: decimal64
-    dValue = nValue * 10^369
+nValue :: int64
+dValue :: decimal64
+dValue = nValue * 10^369
 #+END_SRC
 
 That is to say, an old-style minimum representable positive value of 1
@@ -700,8 +700,8 @@ transactions that doesn't represent accurately the actual serialized
 format and may lead to confusion. For example, the transaction:
 
 #+BEGIN_SRC bitcoin
-    in: 100 FRC
-    out: 100 FRC to Alice
+input: 100 FRC
+output: 100 FRC to Alice
 #+END_SRC
 
 Means that the payer (a general term for the user building the final
@@ -727,9 +727,9 @@ that act like open binding orders that wait outside of the chain.
 For example, considering this offer1 created by Alice:
 
 #+BEGIN_SRC bitcoin
-    in: 50 pubA
-    out: 100 pubB to alice1
-    granularity: 10
+input: 50 pubA
+output: 100 pubB to alice1
+granularity: 10
 #+END_SRC
 
 The price is here 2 pubB for each pubA, and the offer can be divided
@@ -741,9 +741,9 @@ sub-transaction in a full valid transaction. Bob buys 10 of those
 pubA by broadcasting this transaction:
 
 #+BEGIN_SRC bitcoin
-    sub-txns: <quantity=2, offer1>
-    in: 20 pubB
-    out: 10 pubA to bob1
+sub-txns: <quantity=2, offer1>
+input: 20 pubB
+output: 10 pubA to bob1
 #+END_SRC
 
 Since the =nQuantity= specified for offer1 is 2, he has to put in 20
@@ -755,9 +755,9 @@ remain in the offer. Carol could take 20 more pubA with this
 transaction:
 
 #+BEGIN_SRC bitcoin
-    sub-txns: <4, offer1>
-    in: 40.1 pubB, 0.1 FRC
-    out: 19.99 pubA to carol1
+sub-txns: <4, offer1>
+input: 40.1 pubB, 0.1 FRC
+output: 19.99 pubA to carol1
 #+END_SRC
 
 Since Carol has payed more than needed and claimed less than she
@@ -768,8 +768,8 @@ remaining 10 pubA which is left in the partially-spent transaction
 output:
 
 #+BEGIN_SRC bitcoin
-    in: tx_id:output where the 50 pubA were originally contained
-    out: 10 pubA to alice2
+input: tx_id:output where the 50 pubA were originally contained
+output: 10 pubA to alice2
 #+END_SRC
 
 Since this clears out the remaining balance of the output, it is
@@ -815,13 +815,13 @@ sell by auction, and starts collecting bids like the following
 examples:
 
 #+BEGIN_SRC bitcoin
-in: 100 FRC
-out: 1 item to bid1
+input: 100 FRC
+output: 1 item to bid1
 #+END_SRC
 
 #+BEGIN_SRC bitcoin
-in: 110 FRC
-out: 1 item to bid2
+input: 110 FRC
+output: 1 item to bid2
 #+END_SRC
 
 When the auction is ended, the seller selects the highest bid and
@@ -829,8 +829,8 @@ composes a complete transaction:
 
 #+BEGIN_SRC bitcoin
 sub-txns: <bid2>
-in: 1 item
-out: 110 FRC to seller1
+input: 1 item
+output: 110 FRC to seller1
 #+END_SRC
 
 Since this is a higher-level transaction, the signature of the seller
@@ -844,8 +844,8 @@ the roles of the buyer and seller reversed in the protocol. The seller
 suggests a price by constructing a signed offer like the following:
 
 #+BEGIN_SRC bitcoin
-in: 1 item
-out: 120 FRC to offer1
+input: 1 item
+output: 120 FRC to offer1
 #+END_SRC
 
 The seller then broadcasts this offer and waits some period of time to
@@ -853,8 +853,8 @@ see if anyone takes it. If not, the price is lowered and a new offer
 broadcast:
 
 #+BEGIN_SRC bitcoin
-in: 1 item
-out: 110 FRC to offer2
+input: 1 item
+output: 110 FRC to offer2
 #+END_SRC
 
 The seller knows an offer has been accepted and the auction closed
@@ -862,8 +862,8 @@ when he detects a transaction of the following form on the network:
 
 #+BEGIN_SRC bitcoin
 sub-txns: <offer2>
-in: 110 FRC
-out: 1 item to buyer1
+input: 110 FRC
+output: 1 item to buyer1
 #+END_SRC
 
 The first buyer to get a combined transaction on the chain using one
@@ -881,8 +881,8 @@ Alice offers to buy 100 pubB at a price of 0.5 pubA for each pubB, in
 units of 10 pubB at a time:
 
 #+BEGIN_SRC bitcoin
-in: 50 pubA
-out: 100 pubB to bid1
+input: 50 pubA
+output: 100 pubB to bid1
 granularity: 10
 #+END_SRC
 
@@ -890,8 +890,8 @@ Bob independently offers to sell 20 pubB for 9.5 pubA, a price of
 0.475 pubA for each pubB, in units of 5 pubB at a time:
 
 #+BEGIN_SRC bitcoin
-in: 20 pubB
-out: 9.5 pubA to ask1
+input: 20 pubB
+output: 9.5 pubA to ask1
 granularity: 4
 #+END_SRC
 
@@ -997,7 +997,7 @@ The nQuantity n must be lower than the nGranularity N
 *** Short Call
 
 The seller in the long call example is taking the short call position.
-    
+
 *** Long Put
 
 In the long call example the asset being traded was pubA and pubB was
@@ -1031,13 +1031,13 @@ conditional dependencies.
 Seller constructs private order (200 privB for 100 pubA):
 
 #+BEGIN_SRC bitcoin
-in: 200 privB
-out: -
+input: 200 privB
+output: -
 granularity: 4
 validation scriptPubKey:
-  DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantB_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
-  OP_FROMALTSTACK (amount) OP_DUP 25 OP_DIV QUANTITY OP_EQUALVERIFY
-  OP_FROMALTSTACK (expiry) seller1 pubA FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
+    DELEGATION_SEPARATOR DUP HASH160 <accountantB_pkh> EQUALVERIFY CHECKSIGVERIFY
+    FROMALTSTACK (amount) DUP 25 DIV QUANTITY EQUALVERIFY
+    FROMALTSTACK (expiry) seller1 pubA FRC_CHAIN_ID OUTPUT_EXISTS
 #+END_SRC
 
 ...and signs the partial transaction.
@@ -1064,15 +1064,15 @@ The payer (who just wants 50 privB) completes the private transaction
 with:
 
 #+BEGIN_SRC bitcoin
-in: -
-out: 50 privB to buyer1
+input: -
+output: 50 privB to buyer1
 #+END_SRC
 
 The buyer also creates the public transaction:
 
 #+BEGIN_SRC bitcoin
-in: 50 pubA
-out: 50 pubA to seller1
+input: 50 pubA
+output: 50 pubA to seller1
 expiry: 10000
 #+END_SRC
 
@@ -1115,8 +1115,8 @@ of the public one, the private transaction is invalid.
 The seller constructs the public order:
 
 #+BEGIN_SRC bitcoin
-in: 100 pubB
-out: 100 accountantA:privA to seller1
+input: 100 pubB
+output: 100 accountantA:privA to seller1
 validation scriptPubKey:
     DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantA_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
 #+END_SRC
@@ -1127,16 +1127,16 @@ The payer (who just wants 50 pubB) completes the public transaction
 with:
 
 #+BEGIN_SRC bitcoin
-in: -
-out: 50 pubB to buyer1
+input: -
+output: 50 pubB to buyer1
 expiry: 10000
 #+END_SRC
 
 The buyer also creates the private transaction:
 
 #+BEGIN_SRC bitcoin
-in: 50 privA
-out: 50 privA to seller1
+input: 50 privA
+output: 50 privA to seller1
 validation scriptPubKey:
     10000 50 buyer1 pubB FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
 #+END_SRC
@@ -1159,15 +1159,15 @@ Opened offers:
    1 ) Fully public:
 
 #+BEGIN_SRC bitcoin bitcoin
-in: 100 pubB
-out: 100 pubA to userB
+input: 100 pubB
+output: 100 pubA to userB
 #+END_SRC
 
    2 ) Private for Public:
 
 #+BEGIN_SRC bitcoin
-in: 100 privC
-out: 100 FRC:pubB to userC
+input: 100 privC
+output: 100 FRC:pubB to userC
 validation scriptPubKey:
     DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantC_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
     OP_FROMALTSTACK (expiry) OP_FROMALTSTACK (amount) userC pubB FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
@@ -1176,8 +1176,8 @@ validation scriptPubKey:
    3 ) Private for private:
 
 #+BEGIN_SRC bitcoin
-in: 100 privD
-out: 100 accC:privC to userD
+input: 100 privD
+output: 100 accC:privC to userD
 validation scriptPubKey:
     DELEGATION_SEPARATOR OP_DUP OP_HASH160 <accountantC_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
     OP_DUP OP_HASH160 <accountantD_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
@@ -1186,8 +1186,8 @@ validation scriptPubKey:
    4 ) Public for private:
 
 #+BEGIN_SRC bitcoin
-in: 100 pubE
-out: 100 accD:privD to userE
+input: 100 pubE
+output: 100 accD:privD to userE
 validation scriptPubKey:
     OP_DUP OP_HASH160 <accountantD_pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
 #+END_SRC
@@ -1196,9 +1196,9 @@ The payer (userA) who wants to buy 50 pubE for 50 pubA builds the
 public transaction (pub_tx) using offers 1 and 4:
 
 #+BEGIN_SRC bitcoin
-in:  50 pubA
-out: 50 pubB to userC
-     50 pubE to userA
+input:  50 pubA
+output: 50 pubB to userC
+        50 pubE to userA
 expiry: 10000
 #+END_SRC
 
@@ -1213,8 +1213,8 @@ Two private transactions need to be created:
 Using offer 2, the payer also builds transaction priv_tx_1:
 
 #+BEGIN_SRC bitcoin
-in: -
-out: 50 privC to userD
+input: -
+output: 50 privC to userD
 #+END_SRC
 
 The validation scriptPubKey for 2 must be completed pushing 50 as the
@@ -1224,8 +1224,8 @@ and thus this whole transaction still depends on accC's signature.
 The other private transaction (priv_tx_2) is built using offer 3:
 
 #+BEGIN_SRC bitcoin
-in: -
-out: 50 privD to userE
+input: -
+output: 50 privD to userE
 validation scriptPubKey:
     10000 50 userC pubB FRC_CHAIN_ID OP_OUTPUT_EXISTS_BEFORE
 #+END_SRC
