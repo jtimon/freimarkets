@@ -706,19 +706,21 @@ format and may lead to confusion. For example, the transaction:
 
 Means that the payer (a general term for the user building the final
 transaction, regardless of it being an actual payment or a trade
-execution) puts in the input a tx_id and an output that point to an
-output he controls and contains 100 unspent FRC.
+execution) adds signed inputs totaling at least 100 FRC and inserts a
+change address reclaiming the remainder minus fees. For the most part,
+change addresses and miner fees are elided from the examples in order
+to keep the presentation clear.
 
-Alice1, alice2, alice3, etc. are all addresses or script hashes (p2sh)
-that Alice controls. PubA, pubB, pubC, etc. Are there custom assets
-issued in the public chain. PrivA, privB, privC are all private
-assets managed outside the public chain, if nothing is said, it is
-assume that they're issued in different servers. If it needs to be
-clarified, a label for the chain will be prefixed as follows: 
-frc_chain:FRC, frc_chain:pubA, chainB:pubB, accountantC:privC,
-accountantD:privD, etc. 
+=alice1=, =alice2=, =alice3=, etc. are all addresses or script hashes
+(p2sh) that Alice controls. =pubA=, =pubB=, =pubC=, etc. are custom
+assets issued in the public chain. =privA=, =privB=, =privC= are all
+private assets managed outside the public chain, if nothing is said,
+it is assume that they're issued in different accounting servers. If
+it needs to be clarified, a label for the chain or server will be
+prefixed as follows: =frc_chain:FRC=, =frc_chain:pubA=, =chainB:pubB=,
+=accountantC:privC=, =accountantD:privD=, etc.
 
-*** p2p exchange
+*** Peer-to-peer exchange
 
 Sub-transactions enable the creation of partially valid transactions
 that act like open binding orders that wait outside of the chain.
@@ -738,14 +740,13 @@ While the 100 pubA remain in the UTXO set, anyone can use this
 sub-transaction in a full valid transaction. Bob buys 10 of those
 pubA by broadcasting this transaction:
 
-
 #+BEGIN_SRC bitcoin
-    sub-txns: <2, offer1>
+    sub-txns: <quantity=2, offer1>
     in: 20 pubB
     out: 10 pubA to bob1
 #+END_SRC
 
-Since the nQuantity specified for offer1 is 2, he has to put in 20
+Since the =nQuantity= specified for offer1 is 2, he has to put in 20
 pubB and he can claim up to 10 pubA.
 
 Although the sub-transaction has appeared in the chain already, the
@@ -763,28 +764,35 @@ Since Carol has payed more than needed and claimed less than she
 could, the miner gets the 0.1 pubB, 0.1 FRC and 0.01 pubA as fee.
 
 Finally, Alice decides to cancel the offer by just spending the
-remaining 10 pubA still in the utxo set.
+remaining 10 pubA which is left in the partially-spent transaction
+output:
 
 #+BEGIN_SRC bitcoin
     in: tx_id:output where the 50 pubA were originally contained
     out: 10 pubA to alice2
 #+END_SRC
 
-Since there's not enough funds in the output, any further attempt to
-use offer1 in a transaction will be invalid.
+Since this clears out the remaining balance of the output, it is
+removed from the set of unspent transaction outputs, and any further
+attempt to use offer1 will invalidated.
 
 Although in this examples the payers (Bob and Carol) use the orders
 directly and actively, miners can act as exchange engines by pairing
-matching open orders as described in section \ref{doubleAuction}.
+matching crossover orders as described in section \ref{doubleAuction}.
 
 *** MODIFY Transitive trust relationships
 
 By issuing assets representing IOU debts and signing outstanding
 offers representing lines of credit, standard marketplace mechanisms
 can be used to execute payments through networks of transitive trust
-relationships. These payments look just like the double-auction
-marketplace transactions covered above, except that they typically
-involve 3 or more asset types.
+relationships. These payments look like the marketplace transactions
+involving 3 or more asset types.
+
+Alice, Bob, and Carol issue public assets pubA, pubB, and pubC
+representing bitcoin IOUs. For simplicity we use public assets and
+bitcoins over freicoins to avoid complicating the example with
+cross-chain trade and demurrage.
+
 *** MODIFY Baskets currencies and gateways
 
 A /basket currency/ can be issued and fully managed within the block
@@ -799,47 +807,63 @@ bitcoin for freicoin, for example). Assets are redeemed by a similar
 process in reverse.
 
 ** [0/4] Auctions
+
 *** MODIFY English Auction
+
 In the English auction, the owner of an asset declares his intent to
-sell by auction, and starts collecting bids of the following form:
+sell by auction, and starts collecting bids like the following
+examples:
 
 #+BEGIN_SRC bitcoin
-    in: <bid price>
-    out: <asset being auctioned, to buyer>
+in: 100 FRC
+out: 1 item to bid1
+#+END_SRC
+
+#+BEGIN_SRC bitcoin
+in: 110 FRC
+out: 1 item to bid2
 #+END_SRC
 
 When the auction is ended, the seller selects the highest bid and
 composes a complete transaction:
 
 #+BEGIN_SRC bitcoin
-    sub-txns: <highest bid>
-    in: <asset being auctioned>
-    out: <bid price minus fee, to seller>
+sub-txns: <bid2>
+in: 1 item
+out: 110 FRC to seller1
 #+END_SRC
 
 Since this is a higher-level transaction, the signature of the seller
-covers the included highest bid sub-transaction.
+covers the included highest bid sub-transaction, so it is not possible
+for the winning bid to be substituted.
+
 *** MODIFY Dutch auction
 
-A Dutch auction is basically the same, but with the roles of the buyer
-and seller reversed. The seller suggests a price by constructing an
-offer of the following format:
+A Dutch auction is basically the same as an English auction, but with
+the roles of the buyer and seller reversed in the protocol. The seller
+suggests a price by constructing a signed offer like the following:
 
 #+BEGIN_SRC bitcoin
-    in: <asset being auctioned>
-    out: <bid price, to seller>
+in: 1 item
+out: 120 FRC to offer1
 #+END_SRC
 
 The seller then broadcasts this offer and waits some period of time to
 see if anyone takes it. If not, the price is lowered and a new offer
-broadcast. The seller knows an offer has been accepted and the auction
-closed when he detects a transaction of the following form on the
-network:
+broadcast:
 
 #+BEGIN_SRC bitcoin
-    sub-txns: <one of the seller's offers>
-    in: <bid price>
-    out: <asset being auctioned, to buyer>
+in: 1 item
+out: 110 FRC to offer2
+#+END_SRC
+
+The seller knows an offer has been accepted and the auction closed
+when he detects a transaction of the following form on the network:
+
+#+BEGIN_SRC bitcoin
+sub-txns: <offer2>
+in: 110 FRC
+out: 1 item to buyer1
 #+END_SRC
 
 The first buyer to get a combined transaction on the chain using one
@@ -848,55 +872,54 @@ of the seller's offers wins the auction.
 *** MODIFY Double auction (market/exchange)
 #+LaTeX: \label{doubleAuction}
 
-This is a generalization of the multi-item English auction (which is
-basically a regular market). For any asset pairing, an out-of-chain
-mechanism exists for constructing, sharing, and collecting signed
-offers of the following forms:
+This is a generalization of the multi-item English auction, which is
+basically a regular market with the miners handling order execution.
+For any asset pairing, an out-of-chain mechanism exists for building,
+sharing, and collecting signed offers.
+
+Alice offers to buy 100 pubB at a price of 0.5 pubA for each pubB, in
+units of 10 pubB at a time:
 
 #+BEGIN_SRC bitcoin
-    in: <assetA:1A>
-    out: <assetB:1B, to person constructing offer>
-    granularity: N
-
-    in: <assetB:2B>
-    out: <assetA:2A, to person constructing offer>
-    granularity: M
+in: 50 pubA
+out: 100 pubB to bid1
+granularity: 10
 #+END_SRC
 
-The first offer is a bid of assetA for assetB at a price of 1B/1A. The
-second offer is the corresponding ask: assetB for assetA at a price of
-2B/2A. So long as the bid price is greater than the ask price, it is
-possible for anyone to combine these two offers together to yield a
-composite market transaction:
+Bob independently offers to sell 20 pubB for 9.5 pubA, a price of
+0.475 pubA for each pubB, in units of 5 pubB at a time:
 
 #+BEGIN_SRC bitcoin
-    sub-txns: <bid, quantity n<=N>
-              <ask, quantity m<=M>
-    fee: <bid - ask, fee to miner>
+in: 20 pubB
+out: 9.5 pubA to ask1
+granularity: 4
+#+END_SRC
+
+So long as the bid price is greater than the ask price, as is the case
+here, it is possible for anyone to combine these two offers together
+to yield a composite market transaction:
+
+#+BEGIN_SRC bitcoin
+sub-txns: <quantity=2, bid>
+          <quantity=4, ask>
+fee: 0.5 pubA to miner
 #+END_SRC
 
 The use of granularity and quantity allow fractional parts of each
-offer to be claimed, since in general there is no expectation that the
-offers
+offer to be claimed.
 
 Note that although the crossover spread could be claimed as an output,
 anyone else could take the bids and construct their own matching
 transaction and claim the fee for their own. We assume that miners
-will know how to do this, and one way or another the fee is ultimately
-claimed by them. Market clearing becomes a profitable source of
-revenue in addition to payment transaction fees.
-
-*** MODIFY Other auctions
-
-Note that although a variety of auction types are implementable, this
-system is unfortunately not expressive enough to manage the ideal
-Vickrey second-price auction in a trust-free manor. There are,
-however, implementable cryptographic protocols for doing so
-out-of-protocol using homomorphic encryption.
+will know how to do this, and one way or another the crossover spread
+will ultimately be claimed by them. Market clearing becomes a
+profitable source of revenue in addition to intentional transaction
+fees.
 
 ** [0/2] Basic financial use cases
 *** TODO p2p lending
 *** TODO Stocks and dividend payments
+
 ** REVIEW Options
 
 Options[fn:options] are financial instruments typically used to
@@ -915,8 +938,8 @@ input: Q pubA
 output: Q * X pubB to <seller1 pkh>
 expiry: Exp
 scriptValidPubKey:
-  OP_HASH160 <seller's secret hash> OP_EQUALVERIFY
-  OP_DUP OP_HASH160 <buyer1 pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
+    HASH160 <seller's secret hash> EQUALVERIFY
+    DUP HASH160 <buyer1 pkh> EQUALVERIFY CHECKSIGVERIFY
 #+END_SRC
 
 The buyer only lacks the seller's secret to be able to exercise the
@@ -928,7 +951,7 @@ input: P pubB
 output: -
 expiry: Exp2
 scriptValidPubKey:
-  OP_HASH160 <seller's secret hash> OP_EQUALVERIFY
+    HASH160 <seller's secret hash> EQUALVERIFY
 #+END_SRC
 
 Finally, the seller completes the buyer's the transaction to receive
