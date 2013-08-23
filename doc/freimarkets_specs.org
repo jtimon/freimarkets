@@ -751,7 +751,7 @@ precious metals, or a cross-chain transaction (atomically swapping
 bitcoin for freicoin, for example). Assets are redeemed by a similar
 process in reverse.
 
-** MODIFY Auctions
+** [0/4] Auctions
 *** MODIFY English Auction
 In the English auction, the owner of an asset declares his intent to
 sell by auction, and starts collecting bids of the following form:
@@ -798,7 +798,48 @@ network:
 The first buyer to get a combined transaction on the chain using one
 of the seller's offers wins the auction.
 
-*** Other auctions
+*** MODIFY Double auction (market/exchange)
+#+LaTeX: \label{doubleAuction}
+
+This is a generalization of the multi-item English auction (which is
+basically a regular market). For any asset pairing, an out-of-chain
+mechanism exists for constructing, sharing, and collecting signed
+offers of the following forms:
+
+#+BEGIN_SRC bitcoin
+    in: <assetA:1A>
+    out: <assetB:1B, to person constructing offer>
+    granularity: N
+
+    in: <assetB:2B>
+    out: <assetA:2A, to person constructing offer>
+    granularity: M
+#+END_SRC
+
+The first offer is a bid of assetA for assetB at a price of 1B/1A. The
+second offer is the corresponding ask: assetB for assetA at a price of
+2B/2A. So long as the bid price is greater than the ask price, it is
+possible for anyone to combine these two offers together to yield a
+composite market transaction:
+
+#+BEGIN_SRC bitcoin
+    sub-txns: <bid, quantity n<=N>
+              <ask, quantity m<=M>
+    fee: <bid - ask, fee to miner>
+#+END_SRC
+
+The use of granularity and quantity allow fractional parts of each
+offer to be claimed, since in general there is no expectation that the
+offers
+
+Note that although the crossover spread could be claimed as an output,
+anyone else could take the bids and construct their own matching
+transaction and claim the fee for their own. We assume that miners
+will know how to do this, and one way or another the fee is ultimately
+claimed by them. Market clearing becomes a profitable source of
+revenue in addition to payment transaction fees.
+
+*** MODIFY Other auctions
 
 Note that although a variety of auction types are implementable, this
 system is unfortunately not expressive enough to manage the ideal
