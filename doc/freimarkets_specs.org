@@ -931,34 +931,54 @@ the protocol extensions.
 The buyer pays premium P for the right to buy up to Q pubA in
 exchange of pubB at price X before expiry Exp.
 
-The seller signs the following option sub-transaction:
+The seller signs the following transaction tx1:
 
 #+BEGIN_SRC bitcoin
 input: Q pubA
+output: Q pubA to script1
+#+END_SRC
+
+script1:
+
+#+BEGIN_SRC bitcoin
+if (BLOCK_HEIGHT < Exp)
+  OP_DUP OP_HASH160 <buyer1 pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
+else
+ OP_DUP OP_HASH160 <seller1 pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
+AND
+  OP_HASH160 <seller's secret hash> OP_EQUALVERIFY
+#+END_SRC
+
+option sub-transaction sub-tx1:
+
+#+BEGIN_SRC bitcoin
+input: script1
 output: Q * X pubB to <seller1 pkh>
+granularity: N
 expiry: Exp
 scriptValidPubKey:
-    HASH160 <seller's secret hash> EQUALVERIFY
-    DUP HASH160 <buyer1 pkh> EQUALVERIFY CHECKSIGVERIFY
+  OP_DUP OP_HASH160 <buyer1 pkh> OP_EQUALVERIFY OP_CHECKSIGVERIFY
 #+END_SRC
 
 The buyer only lacks the seller's secret to be able to exercise the
 sub-transaction. So he pays the premium conditionally to the secret
-being revelead before Exp2 with the following sub-transaction:
+being revelead before Exp2 with the following sub-transaction sub-tx2:
 
 #+BEGIN_SRC bitcoin
 input: P pubB
 output: -
+granularity: 1
 expiry: Exp2
 scriptValidPubKey:
-    HASH160 <seller's secret hash> EQUALVERIFY
+  OP_HASH160 <seller's secret hash> OP_EQUALVERIFY
 #+END_SRC
 
-Finally, the seller completes the buyer's the transaction to receive
+Finally, the seller completes the buyer's transaction to receive
 the premium by revealing the secret, allowing the buyer to use the
 option transaction:
 
 #+BEGIN_SRC bitcoin
+sub-txs: <1, sub-tx2>
 input: -
 output: P pubB to <seller2 pkh>
 scriptValidSig: <seller's full secret>
@@ -968,13 +988,13 @@ Now the payer could at any moment before Exp complete the option
 sub-transaction with:
 
 #+BEGIN_SRC bitcoin
+sub-txs: <n, sub-tx1>
 input: Q pubB * X
 output: Q pubA to <buyer2 pkh>
 scriptValidSig: <buyer1 sig> <buyer1 pk> <seller's full secret>
 #+END_SRC
 
-The option sub-transaction could have granularity allowing
-the buyer to buy portions of Q.
+The nQuantity n must be lower than the nGranularity N
 
 *** Short Call
 
