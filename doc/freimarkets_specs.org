@@ -1121,9 +1121,6 @@ DELEGATION_SEPARATOR DUP HASH160 <accountantB_pkh> EQUALVERIFY CHECKSIGVERIFY
 FROMALTSTACK FROMALTSTACK seller1 pubA FRC_CHAIN_ID OUTPUT_EXISTS_BEFORE
 #+END_SRC
 
-Operations in the stack shouldn't be allowed in the validation
-scriptSig for this to be secure.
-
 Now if buyer1 signs the public transaction and it gets into the FRC
 chain before height 10000, the private transaction will be valid.
 Until that happens or height 10000 is reached the transaction is
