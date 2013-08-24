@@ -1,4 +1,4 @@
-#+TITLE: \LARGE{\bf Freimarkets: assets, p2p exchange and off-chain transactions} \linebreak \linebreak \linebreak \linebreak \linebreak \small{Doc v0.0.1}
+#+TITLE: \LARGE{\bf Freimarkets: extending bitcoin protocol with user-specified bearer instruments, peer-to-peer exchange, off-chain accounting, auctions, derivatives and transitive transactions} \linebreak \linebreak \linebreak \linebreak \linebreak \small{Version v0.0.1}
 
 #+AUTHOR: Mark Friedenbach, Jorge Timón
 #+EMAIL: mark@monetize.io, jtimon@monetize.io
@@ -15,6 +15,7 @@
 #+LATEX_HEADER: \hypersetup{colorlinks,citecolor=green,filecolor=black,linkcolor=blue,urlcolor=blue}
 #+LATEX_HEADER: \setcounter{secnumdepth}{5}
 #+LATEX_HEADER: \setcounter{tocdepth}{2}
+#+LATEX_HEADER: \usepackage{parskip}
 #+OPTIONS:   toc:nil H:5
 
 #+TODO: TODO MODIFY DELETE | REVIEW DONE
@@ -22,10 +23,17 @@
 #+begin_latex
 \begin{abstract}
 
-Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomic trades, auctions, derivatives and transitive transactions to Freicoin
+This proposal adds primitives to bitcoin necessary for implementing
+non-currency financial constructs, such as dividend-yielding bonds,
+asset ownership tokens, credit relationships, a variety of forms of
+smart contracts, and distributed marketplaces for exchanging all of
+the above. Private accounting servers provide a mechanism to support
+unlimited volume of off-chain transactions while being able to
+interact with in-chain assets through atomic cross-chain trade and an
+integrated peer-to-peer market.
 \\\\
 
-\textbf{Keywords:} Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomic trades, auctions, derivatives and transitive transactions 
+\textbf{Keywords:} bitcoin, freicoin, user-specified bearer instruments, off-chain accounting, atomic trades, auctions, derivatives, transitive transactions 
 \end{abstract}
 
 \newpage
@@ -37,7 +45,7 @@ Adding arbitrary, user-specified bearer instruments, off-chain accounting, atomi
 
 * Introduction
 
-Herein we propose a new transaction format, ~nVersion=3~ transactions,
+  Herein we propose a new transaction format, ~nVersion=3~ transactions,
 which enables hierarchies of independently verified sub-transactions,
 additional validation scripts and introspective opcodes, strict
 currency controls, as well as relaxation of the rules regarding coin
@@ -112,15 +120,9 @@ Together this enables the following sorts of applications:
   restricted assets prior to inclusion (support for KYC regulatory
   compliance).
 
-This proposal adds primitives to bitcoin necessary for implementing
-non-currency financial constructs, such as dividend-yielding bonds,
-asset ownership tokens, credit relationships, a variety of forms of
-smart contracts, and distributed marketplaces for exchanging all of
-the above. Private accounting servers provide a mechanism to support
-unlimited volume of off-chain transactions while being able to
-interact with in-chain assets through atomic cross-chain trade and an
-integrated peer-to-peer market.
-
+In the remainder of this document we first overview the major features
+of this proposal, then detail the precise modifications and formal
+specifications before covering a handful of applications.
 \newpage
 * Major features
 
@@ -148,9 +150,10 @@ first transaction of a block (where freicoins are currently, and
 continue to be minted). Coins created in such generating transactions
 are not freicoins, but rather user-issued asset shares which represent
 fungible ownership of the underlying asset type, or asset tokens
-identified by per-asset unique bitstrings. Such tokens can be included
-in transactions containing regular Freicoin currency, which in this
-document is sometimes called the host currency or fee currency.
+identified by per-asset unique bitstrings. Such coins or tokens can be
+included in transactions containing regular Freicoin currency, which
+in this document is sometimes called the host currency or fee
+currency.
 
 The creator of the new asset can define an interest/demurrage rate.
 The quantity issued may be fixed or he may define a list of issuance
@@ -221,7 +224,7 @@ authenticated inclusion and index proofs used to notify users of their
 wallet balance, history and current activity, but not revealing other
 user’s balances or transaction history.
 
-By using newly added introspective opcodes to construct scripts
+By using newly added extrospective opcodes to construct scripts
 dependent on external chains, it is possible for private transactions
 to be conditional on public Freicoin blockchain data or other private
 accounting servers.
@@ -236,9 +239,7 @@ would be trivial to implement with this protocol extension.
 \newpage
 * Proposed changes
 
-** Precision and rounding
-
-*** Unlimited-precision fractional arithmetic
+** Precision, rounding, and limits
 
 All internal computation of accounting quantities are performed using
 arbitrary precision fractions, or an equivalent mathematical system
@@ -263,9 +264,9 @@ transactions, the =int64= =nValue= field is interpreted according to
 the following equation:
 
 #+BEGIN_SRC bitcoin
-nValue :: int64
-dValue :: decimal64
-dValue = nValue * 10^369
+    nValue :: int64
+    dValue :: decimal64
+    dValue = nValue * 10^369
 #+END_SRC
 
 That is to say, an old-style minimum representable positive value of 1
@@ -280,7 +281,7 @@ divisibility, this leaves plenty of room at the bottom.
 
 Throughout this document a couple of differing units are used for
 describing financial quantities on the Freicoin block chain. This
-unfortunate confusing situation arises from the history of
+unfortunate and confusing situation arises from the history of
 representing bitcoin/freicoin amounts both in user interface and
 serialization formats.
 
@@ -292,7 +293,7 @@ frc. New-style transactions encode freicoin quantities as =decimal64=
 values, with 1 kria = 10^369, and the smallest non-zero representable
 unit being 10^{-398} or 10^{-775} frc. In either case, it is expected
 that the user interface will be configured to show units of freicoins,
-or the multiplier of the underlying asset, if specified.
+or the multiplier of the underlying asset.
 
 ** Indivisible tokens
 
@@ -337,8 +338,8 @@ A transaction may claim less than the full amount by utilizing a
 granular offer. The signed offer contains a 64-bit integer field
 =nGranularity= which specifies the number of equal-sized units the
 offer is split into, and any transaction making use of the offer may
-choose the number of units to use, so long as there remains sufficient
-output remaining.
+choose the number of units to claim, so long as there remains
+sufficient output remaining.
 
 In order to implement this functionality, the set of unspent
 transaction outputs must include a field recording the amount
@@ -370,10 +371,10 @@ fields.
 New-style transactions have a sorted list of ~<assetid:token,
 scriptSig>~ signatories. The =assetid= is the 20-byte asset tag, with
 a token bitstring taking the remaining bytes. The =scriptPubKey= is
-retrieved from the unspent transaction output containing the
+retrieved from the current unspent transaction output containing the
 identified authorizing token.
 
-** REVIEW [1/1] New scripting opcodes
+** New scripting opcodes
 
 Several new scripting language opcodes are added by this proposal.
 Their behavior are detailed here.
@@ -386,8 +387,8 @@ frame, or its =nTime= value onto the stack.
 *** =DELEGATION_SEPARATOR=
 
 The =DELEGATION_SEPARATOR= opcode is a =NOP= during execution, but
-does affect signature operations. During signature hash serialization
-for any script /except/ the one being executed, all code prior to and
+does affect signature hash operations. During such serialization for
+any script /except/ the one being executed, all code prior to and
 including the =DELEGATION_SEPARATOR= is omitted.
 
 *** =QUANTITY=
@@ -396,9 +397,9 @@ The new =QUANTITY= opcode pushes the =nQuantity= value of the current
 frame onto the stack, or 1 if the current frame is a block-level
 transaction.
 
-*** REVIEW Extrospection opcodes
+*** Extrospection opcodes
 
-The following opcodes assume the maintenance of a discrete list of
+The following opcodes assume the maintenance of a discrete set of
 observed chains by each chain. If a public chain observes another
 public chain, it's validation and security become completely
 dependent on the observed chain, and any reorg on the later can
@@ -417,67 +418,33 @@ described in section \ref{freiExtOpcodes}.
 **** =OUTPUT_SPENT=
 
 #+BEGIN_SRC bitcoin
-<tx_id> <output number> <height> <chain_id> OUTPUT_SPENT
+    <tx_id> <output number> <height> <chain-id> OUTPUT_SPENT
 #+END_SRC
 
 Throws an error (abnormally terminating script execution) if the
 following condition is true:
 
-- The chain identified by <chain_id> (the hash of the chain's genesis
+- The chain identified by <chain-id> (the hash of the chain's genesis
   block) is not part of the set of chains observed by the chain for
   which the script is being validated.
 
 Returns 0 if the following condition is true:
 
 - The output identified by <tx_id>:<output number> still exists in
-  the UTXO of <chain_id> at block height <height>.
+  the UTXO of <chain-id> at block height <height>.
 
 Returns 1 otherwise.
 
-**** =OUTPUT_EXISTS=
+**** =OUTPUT_SPENT_IN=
 
 #+BEGIN_SRC bitcoin
-<refheight> <amount> <tokens> <scriptPubKey> <chain_id> <asset_id> <from> <to> OUTPUT_EXISTS
-#+END_SRC
-
-Throws an error (abnormally terminating script execution) if any of
-the following conditions are true:
-
-- The chain identified by <chain_id> (the hash of the chain's genesis
-  block) is not part of the set of chains observed by the chain for
-  which the script is being validated.
-
-- <tokens> is not a serialized, sorted, non-repeating but possibly
-  empty list of bitstrings.
-
-Returns 0 if the following condition is true:
-
-- There's no output in <chain_id> from block height <from> to block
-  height <to> (both included) of the specified asset and contract
-  script, has an output amount greater than or equal to <amount>
-  at reference-height <refheight>, and a set of output tokens which
-  are a superset of <tokens>.
-
-Returns 1 otherwise.
-
-**** Freicoin's treatment of extrospection opcodes
-#+LaTeX: \label{freiExtOpcodes}
-
-In Freicoin, the only observed chain is Freicoin itself. The depth of
-the introspection is restricted too. So the previously defined
-extrospection opcodes are substituted by two more limited ones. Any
-use of the generic ones will result in the script being invalid.
-
-***** =OUTPUT_SPENT_IN=
-
-#+BEGIN_SRC bitcoin
-<tx_id> <output number> OUTPUT_SPENT_IN
+    <tx_id> <output number> OUTPUT_SPENT_IN
 #+END_SRC
 
 It is almost equivalent to the following script:
 
 #+BEGIN_SRC bitcoin
-<tx_id> <output number> BLOCK_HEIGHT FRC_CHAIN_ID OUTPUT_SPENT
+    <tx_id> <output number> BLOCK_HEIGHT FRC_CHAIN_ID OUTPUT_SPENT
 #+END_SRC
 
 The difference being that during execution the unspent transaction
@@ -486,21 +453,58 @@ chain prior to the one being validated, including transactions in the
 current block which precede the transaction being validated, but
 excluding transactions which come later.
 
+**** =OUTPUT_EXISTS=
+
+#+BEGIN_SRC bitcoin
+    <refheight> <amount> <tokens> <scriptPubKey>
+    <chain-id> <asset-id> <from> <to> OUTPUT_EXISTS
+#+END_SRC
+
+Throws an error (abnormally terminating script execution) if any of
+the following conditions are true:
+
+- The chain identified by <chain-id> (the hash of the chain's genesis
+  block) is not part of the set of chains observed by the chain for
+  which the script is being validated.
+
+- <tokens> is not a serialized, sorted, non-repeating but possibly
+  empty list of bitstrings.
+
+Returns 0 if the following condition is true:
+
+- There's no unspent output in <chain-id> from block height <from> to
+  block height <to> (both included) of the specified asset and
+  contract script, with an output amount greater than or equal to
+  <amount> at reference-height <refheight>, and a set of output tokens
+  which are a superset of <tokens>.
+
+Returns 1 otherwise.
+
 ***** =OUTPUT_EXISTS_IN=
 
 #+BEGIN_SRC bitcoin
-<refheight> <amount> <tokens> <scriptPubKey> <asset_id> OUTPUT_EXISTS_IN
+    <refheight> <amount> <tokens> <scriptPubKey> <asset-id> OUTPUT_EXISTS_IN
 #+END_SRC
 
 It is almost equivalent to the following script:
 
 #+BEGIN_SRC bitcoin
-<refheight> <amount> <tokens> <scriptPubKey> FRC_CHAIN_ID <asset_id> BLOCK_HEIGHT BLOCK_HEIGHT OUTPUT_EXISTS
+    <refheight> <amount> <tokens> <scriptPubKey>
+    FRC_CHAIN_ID <asset-id> BLOCK_HEIGHT BLOCK_HEIGHT OUTPUT_EXISTS
 #+END_SRC
 
 Again this will only make nodes look for outputs that are in the utxo
 at the moment of validation (see =OUTPUT_SPENT_IN= above for a more
 detailed explanation).
+
+**** Freicoin's treatment of extrospection opcodes
+#+LaTeX: \label{freiExtOpcodes}
+
+In Freicoin, the only observed chain is Freicoin itself. The depth of
+the introspection is restricted too. So only the more limited
+=OUTPUT_SPENT_IN= and =OUTPUT_EXISTS_IN= opcodes are available. Any
+use of the generic ones will result in abnormal termination of the
+script.
 
 ** Transaction expiration
 
@@ -543,8 +547,9 @@ transactions in the following ways:
 - Outputs are suffixed with an optionally empty, sorted list of unique
   token bitstrings.
 
-- An optionally empty sorted-list mapping of ~<assetid:token,
-  scriptSig>~ signatories is added immediately following =vout=.
+- An optionally empty sorted-list mapping of
+  ~<assetid:token, scriptSig>~ signatories is added immediately
+  following =vout=.
 
 - A new script field, split into two fields =scriptValidPubKey= and
   =scriptValidSig=, is added following the signatories’ list.
@@ -704,29 +709,28 @@ from ordinary transaction types:
   defined take effect /after/ the asset definition transaction).
 
 \newpage
-* [1/3] Example use cases and Bitcoin scripts
+* Example use cases with scripts
 
 Here we expand the set of possible Bitcoin contracts [fn:contracts]
 by using the protocol extensions.
 
-** [0/2] Basic uses
-*** General notation conventions
+** General notation conventions
 
 The following examples will use a summarized notation for
 transactions that doesn't represent accurately the actual serialized
 format and may lead to confusion. For example, the transaction:
 
 #+BEGIN_SRC bitcoin
-input: 100 FRC
-output: 100 FRC to Alice
+    input: 100 FRC
+    output: 100 FRC to Alice
 #+END_SRC
 
 Means that the payer (a general term for the user building the final
 transaction, regardless of it being an actual payment or a trade
 execution) adds signed inputs totaling at least 100 FRC and inserts a
 change address reclaiming the remainder minus fees. For the most part,
-change addresses and miner fees are elided from the examples in order
-to keep the presentation clear.
+change addresses, miner fees, and reference-height details are elided
+from the examples in order to keep the presentation clear.
 
 =alice1=, =alice2=, =alice3=, etc. are all addresses or script hashes
 (p2sh) that Alice controls. =pubA=, =pubB=, =pubC=, etc. are custom
@@ -734,8 +738,10 @@ assets issued in the public chain. =privA=, =privB=, =privC= are all
 private assets managed outside the public chain, if nothing is said,
 it is assume that they're issued in different accounting servers. If
 it needs to be clarified, a label for the chain or server will be
-prefixed as follows: =frc_chain:FRC=, =frc_chain:pubA=, =chainB:pubB=,
-=accountantC:privC=, =accountantD:privD=, etc.
+prefixed as follows: =FRC_CHAIN_ID:FRC=, =FRC_CHAIN_ID:pubA=,
+=chainB:pubB=, =accountantC:privC=, =accountantD:privD=, etc.
+
+** Basic uses
 
 *** Peer-to-peer exchange
 
@@ -744,9 +750,9 @@ that act like open binding orders that wait outside of the chain.
 For example, considering this offer1 created by Alice:
 
 #+BEGIN_SRC bitcoin
-input: 50 pubA
-output: 100 pubB to alice1
-granularity: 10
+    input: 50 pubA
+    output: 100 pubB to alice1
+    granularity: 10
 #+END_SRC
 
 The price is here 2 pubB for each pubA, and the offer can be divided
@@ -758,9 +764,9 @@ sub-transaction in a full valid transaction. Bob buys 10 of those
 pubA by broadcasting this transaction:
 
 #+BEGIN_SRC bitcoin
-sub-txns: <quantity=2, offer1>
-input: 20 pubB
-output: 10 pubA to bob1
+    sub-txns: <quantity=2, offer1>
+    input: 20 pubB
+    output: 10 pubA to bob1
 #+END_SRC
 
 Since the =nQuantity= specified for offer1 is 2, he has to put in 20
@@ -772,9 +778,9 @@ remain in the offer. Carol could take 20 more pubA with this
 transaction:
 
 #+BEGIN_SRC bitcoin
-sub-txns: <4, offer1>
-input: 40.1 pubB, 0.1 FRC
-output: 19.99 pubA to carol1
+    sub-txns: <4, offer1>
+    input: 40.1 pubB, 0.1 FRC
+    output: 19.99 pubA to carol1
 #+END_SRC
 
 Since Carol has payed more than needed and claimed less than she
@@ -785,8 +791,8 @@ remaining 10 pubA which is left in the partially-spent transaction
 output:
 
 #+BEGIN_SRC bitcoin
-input: tx_id:output where the 50 pubA were originally contained
-output: 10 pubA to alice2
+    input: tx_id:output where the 50 pubA were originally contained
+    output: 10 pubA to alice2
 #+END_SRC
 
 Since this clears out the remaining balance of the output, it is
@@ -797,7 +803,7 @@ Although in this examples the payers (Bob and Carol) use the orders
 directly and actively, miners can act as exchange engines by pairing
 matching crossover orders as described in section \ref{doubleAuction}.
 
-*** MODIFY Transitive trust relationships
+*** Transitive trust relationships
 
 By issuing assets representing IOU debts and signing outstanding
 offers representing lines of credit, standard marketplace mechanisms
@@ -810,52 +816,52 @@ representing bitcoin IOUs. For simplicity we use public assets and
 bitcoins over freicoins to avoid complicating the example with
 cross-chain trade and demurrage.
 
-*** MODIFY Baskets currencies
+*** Baskets currencies
 
 A /basket currency/ can be issued and fully managed within the block
 chain. The basket manager issues asset value and then offers it in
 bidirectional exchange for multiple other assets at a fixed rate.
 
-** [0/4] Auctions
+** Auctions
 
-*** MODIFY English Auction
+*** English Auction
 
 In the English auction, the owner of an asset declares his intent to
 sell by auction, and starts collecting bids like the following
 examples:
 
 #+BEGIN_SRC bitcoin
-input: 100 FRC
-output: 1 item to bid1
+    input: 100 FRC
+    output: 1 item to bid1
 #+END_SRC
 
 #+BEGIN_SRC bitcoin
-input: 110 FRC
-output: 1 item to bid2
+    input: 110 FRC
+    output: 1 item to bid2
 #+END_SRC
 
 When the auction is ended, the seller selects the highest bid and
 composes a complete transaction:
 
 #+BEGIN_SRC bitcoin
-sub-txns: <bid2>
-input: 1 item
-output: 110 FRC to seller1
+    sub-txns: <bid2>
+    input: 1 item
+    output: 110 FRC to seller1
 #+END_SRC
 
 Since this is a higher-level transaction, the signature of the seller
 covers the included highest bid sub-transaction, so it is not possible
-for the winning bid to be substituted.
+for another bid to be substituted for the winner.
 
-*** MODIFY Dutch auction
+*** Dutch auction
 
 A Dutch auction is basically the same as an English auction, but with
 the roles of the buyer and seller reversed in the protocol. The seller
 suggests a price by constructing a signed offer like the following:
 
 #+BEGIN_SRC bitcoin
-input: 1 item
-output: 120 FRC to offer1
+    input: 1 item
+    output: 120 FRC to offer1
 #+END_SRC
 
 The seller then broadcasts this offer and waits some period of time to
@@ -863,23 +869,23 @@ see if anyone takes it. If not, the price is lowered and a new offer
 broadcast:
 
 #+BEGIN_SRC bitcoin
-input: 1 item
-output: 110 FRC to offer2
+    input: 1 item
+    output: 110 FRC to offer2
 #+END_SRC
 
 The seller knows an offer has been accepted and the auction closed
 when he detects a transaction of the following form on the network:
 
 #+BEGIN_SRC bitcoin
-sub-txns: <offer2>
-input: 110 FRC
-output: 1 item to buyer1
+    sub-txns: <offer2>
+    input: 110 FRC
+    output: 1 item to buyer1
 #+END_SRC
 
 The first buyer to get a combined transaction on the chain using one
 of the seller's offers wins the auction.
 
-*** MODIFY Double auction (market/exchange)
+*** Double auction (market/exchange)
 #+LaTeX: \label{doubleAuction}
 
 This is a generalization of the multi-item English auction, which is
@@ -887,22 +893,22 @@ basically a regular market with the miners handling order execution.
 For any asset pairing, an out-of-chain mechanism exists for building,
 sharing, and collecting signed offers.
 
-Alice offers to buy 100 pubB at a price of 0.5 pubA for each pubB, in
+Alice offers to buy 100 pubB at a price of 0.500 pubA for each pubB, in
 units of 10 pubB at a time:
 
 #+BEGIN_SRC bitcoin
-input: 50 pubA
-output: 100 pubB to bid1
-granularity: 10
+    input: 50 pubA
+    output: 100 pubB to bid1
+    granularity: 10
 #+END_SRC
 
 Bob independently offers to sell 20 pubB for 9.5 pubA, a price of
 0.475 pubA for each pubB, in units of 5 pubB at a time:
 
 #+BEGIN_SRC bitcoin
-input: 20 pubB
-output: 9.5 pubA to ask1
-granularity: 4
+    input: 20 pubB
+    output: 9.5 pubA to ask1
+    granularity: 4
 #+END_SRC
 
 So long as the bid price is greater than the ask price, as is the case
@@ -910,9 +916,9 @@ here, it is possible for anyone to combine these two offers together
 to yield a composite market transaction:
 
 #+BEGIN_SRC bitcoin
-sub-txns: <quantity=2, bid>
-          <quantity=4, ask>
-fee: 0.5 pubA to miner
+    sub-txns: <quantity=2, bid>
+              <quantity=4, ask>
+    fee: 0.5 pubA to miner
 #+END_SRC
 
 The use of granularity and quantity allow fractional parts of each
@@ -926,46 +932,42 @@ will ultimately be claimed by them. Market clearing becomes a
 profitable source of revenue in addition to intentional transaction
 fees.
 
-** [0/2] Basic financial use cases
-*** TODO p2p lending
-*** TODO Stocks and dividend payments
-
-** REVIEW Options
+** Options
 
 Options[fn:options] are financial instruments typically used to
 hedge. Here we describe how to implement the most basic types using
 the protocol extensions.
 
-*** Long Call
+*** Call
 
-The buyer pays premium P for the right to buy up to Q pubA in
-exchange of pubB at price X before expiry Exp.
+The in a long call the buyer pays premium P for the right to buy up to
+Q pubA in exchange of pubB at price X before expiry Exp.
 
 The seller signs the following transaction tx1:
 
 #+BEGIN_SRC bitcoin
-input: Q pubA
-output: Q pubA to script1
+    input: Q pubA
+    output: Q pubA to script1
 #+END_SRC
 
 script1:
 
 #+BEGIN_SRC bitcoin
-IF ( BLOCK_HEIGHT < Exp )
-    DUP HASH160 <buyer1 pkh> EQUALVERIFY CHECKSIGVERIFY
-ELSE
-    DUP HASH160 <seller1 pkh> EQUALVERIFY CHECKSIGVERIFY
-AND
-    HASH160 <seller's secret hash> EQUALVERIFY
+    IF ( BLOCK_HEIGHT < Exp )
+        DUP HASH160 <buyer1 pkh> EQUALVERIFY CHECKSIGVERIFY
+    ELSE
+        DUP HASH160 <seller1 pkh> EQUALVERIFY CHECKSIGVERIFY
+    AND
+        HASH160 <seller's secret hash> EQUALVERIFY
 #+END_SRC
 
 option sub-transaction sub-tx1:
 
 #+BEGIN_SRC bitcoin
-input: script1
-output: Q * X pubB to <seller1 pkh>
-granularity: N
-expiry: Exp
+    input: script1
+    output: Q * X pubB to <seller1 pkh>
+    granularity: N
+    expiry: Exp
 #+END_SRC
 
 The buyer only lacks the seller's secret to be able to exercise the
@@ -973,12 +975,12 @@ sub-transaction. So he pays the premium conditionally to the secret
 being revelead before Exp2 with the following sub-transaction sub-tx2:
 
 #+BEGIN_SRC bitcoin
-input: P pubB
-output: -
-granularity: 1
-expiry: Exp2
-scriptValidPubKey:
-    HASH160 <seller's secret hash> EQUALVERIFY
+    input: P pubB
+    output: -
+    granularity: 1
+    expiry: Exp2
+    scriptValidPubKey:
+        HASH160 <seller's secret hash> EQUALVERIFY
 #+END_SRC
 
 Finally, the seller completes the buyer's transaction to receive
@@ -986,43 +988,41 @@ the premium by revealing the secret, allowing the buyer to use the
 option transaction:
 
 #+BEGIN_SRC bitcoin
-sub-txs: <1, sub-tx2>
-input: -
-output: P pubB to <seller2 pkh>
-scriptValidSig: <seller's full secret>
+    sub-txs: <1, sub-tx2>
+    input: -
+    output: P pubB to <seller2 pkh>
+    scriptValidSig: <seller's full secret>
 #+END_SRC
 
 Now the payer could at any moment before Exp complete the option
 sub-transaction with:
 
 #+BEGIN_SRC bitcoin
-sub-txs: <n, sub-tx1>
-input: Q pubB * X
-output: Q pubA to <buyer2 pkh>
-scriptValidSig: <buyer1 sig> <buyer1 pk> <seller's full secret>
+    sub-txs: <n, sub-tx1>
+    input: Q pubB * X
+    output: Q pubA to <buyer2 pkh>
+    scriptValidSig: <buyer1 sig> <buyer1 pk> <seller's full secret>
 #+END_SRC
 
-The nQuantity n must be lower than the nGranularity N
-
-*** Short Call
+The nQuantity n must be lower than the =nGranularity=.
 
 The seller in the long call example is taking the short call position.
 
-*** Long Put
+*** Put
 
 In the long call example the asset being traded was pubA and pubB was
 the base currency. If the premium is paid in pubA instead of pubB you
 can consider that pubB is the asset being traded and pubA is the base
 currency.
+
 The right to "buy pubA for pubB" is equivalent to "sell pubB for
 pubA". So in the previous example with the premium being paid in
 pubA, the long call buyer would be the long put seller, and the long
 call seller is the long put buyer.
 
-*** Short Put
-
 The buyer of a long put is taking the short put position.
-** TODO Gateways and Bridges
+
+** Gateways and Bridges
 
 Gateways are similar to basket currencies: an issuer creates an asset
 and then distributes it when funds are received out-of-protocol. This
@@ -1031,7 +1031,7 @@ precious metals, or a cross-chain transaction (atomically swapping
 bitcoin for freicoin, for example). Assets are redeemed by a similar
 process in reverse.
 
-** MODIFY [0/6] Off-chain transactions
+** Off-chain transactions
 
 For ultimate privacy and scalability, off-chain accounting services
 are preferred. This proposal provides the missing pieces necessary for
@@ -1044,20 +1044,20 @@ To support global consensus mechanisms, a new suite of extrospective
 opcodes are added, allowing transactions to contain cross-chain
 conditional dependencies.
 
-*** MODIFY Private buy with public funds
+*** Private buy with public funds
 
 Seller constructs private order (200 privB for 100 pubA):
 
 #+BEGIN_SRC bitcoin
-input: 200 privB
-output: -
-granularity: 4
-validation scriptPubKey:
-    DELEGATION_SEPARATOR DUP HASH160 <accountantB_pkh> EQUALVERIFY CHECKSIGVERIFY
-    FROMALTSTACK(refheight) DUP 8000 EQUALVERIFY
-    FROMALTSTACK(amount) DUP 25 DIV QUANTITY EQUALVERIFY
-    FROMALTSTACK(tokens) DUP 0 EQUALVERIFY
-    seller1 FRC_CHAIN_ID pubA FROMALTSTACK(from) FROMALTSTACK(to) OUTPUT_EXISTS
+    input: 200 privB
+    output: -
+    granularity: 4
+    validation scriptPubKey:
+        DELEGATION_SEPARATOR DUP HASH160 <accountantB_pkh> EQUALVERIFY CHECKSIGVERIFY
+        FROMALTSTACK(refheight) DUP 8000 EQUALVERIFY
+        FROMALTSTACK(amount) DUP 25 DIV QUANTITY EQUALVERIFY
+        FROMALTSTACK(tokens) DUP 0 EQUALVERIFY
+        seller1 FRC_CHAIN_ID pubA FROMALTSTACK(from) FROMALTSTACK(to) OUTPUT_EXISTS
 #+END_SRC
 
 ...and signs the partial transaction.
@@ -1078,17 +1078,17 @@ The payer (who just wants 50 privB) completes the private transaction
 with:
 
 #+BEGIN_SRC bitcoin
-input: -
-output: 50 privB to buyer1
+    input: -
+    output: 50 privB to buyer1
 #+END_SRC
 
 The buyer also creates the public transaction:
 
 #+BEGIN_SRC bitcoin
-input: 50 pubA
-output: 50 pubA to seller1
-expiry: 10000
-refheight: 8000
+    input: 50 pubA
+    output: 50 pubA to seller1
+    expiry: 10000
+    refheight: 8000
 #+END_SRC
 
 ...but doesn't sign it. It sends both complete but not signed
@@ -1096,36 +1096,36 @@ transactions to the accountant who reads them and completes the
 private validation scriptPubKey with:
 
 #+BEGIN_SRC bitcoin
-10000 TOALTSTACK(to)
-0     TOALTSTACK(from)
-0     TOALTSTACK(tokens)
-50    TOALTSTACK(amount)
-8000  TOALTSTACK(refheight)
+    10000 TOALTSTACK(to)
+    0     TOALTSTACK(from)
+    0     TOALTSTACK(tokens)
+    50    TOALTSTACK(amount)
+    8000  TOALTSTACK(refheight)
 #+END_SRC
 
 Finally accountantB signs it all and fills the sub-tx validation
 scriptSig with:
 
 #+BEGIN_SRC bitcoin
-<accountantB_sig> <accountantB_pk>
+    <accountantB_sig> <accountantB_pk>
 #+END_SRC
 
 Before validation the =scriptValidSig= and =scriptValidPubKey= are
 combined together to yield:
 
 #+BEGIN_SRC bitcoin
-<accountantB_sig> <accountantB_pk>
-10000 TOALTSTACK(to)
-0     TOALTSTACK(from)
-0     TOALTSTACK(tokens)
-50    TOALTSTACK(amount)
-8000  TOALTSTACK(refheight)
-DELEGATION_SEPARATOR
-DUP HASH160 <accountantB_pkh> EQUALVERIFY CHECKSIGVERIFY
-FROMALTSTACK(refheight) DUP 8000 EQUALVERIFY
-FROMALTSTACK(amount) DUP 25 DIV QUANTITY EQUALVERIFY
-FROMALTSTACK(tokens) DUP 0 EQUALVERIFY
-seller1 FRC_CHAIN_ID pubA FROMALTSTACK(from) FROMALTSTACK(to) OUTPUT_EXISTS
+    <accountantB_sig> <accountantB_pk>
+    10000 TOALTSTACK(to)
+    0     TOALTSTACK(from)
+    0     TOALTSTACK(tokens)
+    50    TOALTSTACK(amount)
+    8000  TOALTSTACK(refheight)
+    DELEGATION_SEPARATOR
+    DUP HASH160 <accountantB_pkh> EQUALVERIFY CHECKSIGVERIFY
+    FROMALTSTACK(refheight) DUP 8000 EQUALVERIFY
+    FROMALTSTACK(amount) DUP 25 DIV QUANTITY EQUALVERIFY
+    FROMALTSTACK(tokens) DUP 0 EQUALVERIFY
+    seller1 FRC_CHAIN_ID pubA FROMALTSTACK(from) FROMALTSTACK(to) OUTPUT_EXISTS
 #+END_SRC
 
 Now if buyer1 signs the public transaction and it gets into the FRC
@@ -1134,16 +1134,16 @@ Until that happens or height 10000 is reached the transaction is
 considered to be in process and after height 10000 without appearance
 of the public one, the private transaction is invalid.
 
-*** MODIFY Buying public assets with private assets
+*** Buying public assets with private assets
 
 The seller constructs the public order:
 
 #+BEGIN_SRC bitcoin
-input: 100 pubB
-output: 100 accountantA:privA to seller1
-validation scriptPubKey:
-    DELEGATION_SEPARATOR
-    DUP HASH160 <accountantA_pkh> EQUALVERIFY CHECKSIGVERIFY
+    input: 100 pubB
+    output: 100 accountantA:privA to seller1
+    validation scriptPubKey:
+        DELEGATION_SEPARATOR
+        DUP HASH160 <accountantA_pkh> EQUALVERIFY CHECKSIGVERIFY
 #+END_SRC
 
 ...and signs the partial transaction.
@@ -1152,18 +1152,18 @@ The payer (who just wants 50 pubB) completes the public transaction
 with:
 
 #+BEGIN_SRC bitcoin
-input: -
-output: 50 pubB to buyer1
-expiry: 10000
+    input: -
+    output: 50 pubB to buyer1
+    expiry: 10000
 #+END_SRC
 
 The buyer also creates the private transaction:
 
 #+BEGIN_SRC bitcoin
-input: 50 privA
-output: 50 privA to seller1
-validation scriptPubKey:
-    0 50 0 buyer1 0 10000 pubB FRC_CHAIN_ID OUTPUT_EXISTS
+    input: 50 privA
+    output: 50 privA to seller1
+    validation scriptPubKey:
+        0 50 0 buyer1 0 10000 pubB FRC_CHAIN_ID OUTPUT_EXISTS
 #+END_SRC
 
 The buyer signs the private transaction and sends it with the public
@@ -1171,7 +1171,7 @@ one to accountantA. The public transaction only lacks accountantA's
 signature to be valid. If the public transaction gets into the chain
 before 10000 the private one is also valid, otherwise is rolled back.
 
-*** MODIFY Hybrid Transitive transaction
+*** Hybrid Transitive transaction
 
 pubA -> pubB -> privC -> privD -> pubE -> userA
 
@@ -1184,52 +1184,52 @@ Opened offers:
    1 ) Fully public:
 
 #+BEGIN_SRC bitcoin bitcoin
-input: 100 pubB
-output: 100 pubA to userB
+    input: 100 pubB
+    output: 100 pubA to userB
 #+END_SRC
 
    2 ) Private for Public:
 
 #+BEGIN_SRC bitcoin
-input: 100 privC
-output: [100 FRC:pubB to userC]
-validation scriptPubKey:
-    DELEGATION_SEPARATOR
-    DUP HASH160 <accountantC_pkh> EQUALVERIFY CHECKSIGVERIFY
-    FROMALTSTACK(refheight) DUP 0 EQUALVERIFY
-    FROMALTSTACK(amount) DUP 100 EQUALVERIFY
-    FROMALTSTACK(tokens) DUP 0 EQUALVERIFY
-    userC FRC_CHAIN_ID pubB FROMALTSTACK(from) FROMALTSTACK(to) OUTPUT_EXISTS
+    input: 100 privC
+    output: [100 FRC:pubB to userC]
+    validation scriptPubKey:
+        DELEGATION_SEPARATOR
+        DUP HASH160 <accountantC_pkh> EQUALVERIFY CHECKSIGVERIFY
+        FROMALTSTACK(refheight) DUP 0 EQUALVERIFY
+        FROMALTSTACK(amount) DUP 100 EQUALVERIFY
+        FROMALTSTACK(tokens) DUP 0 EQUALVERIFY
+        userC FRC_CHAIN_ID pubB FROMALTSTACK(from) FROMALTSTACK(to) OUTPUT_EXISTS
 #+END_SRC
 
    3 ) Private for private:
 
 #+BEGIN_SRC bitcoin
-input: 100 privD
-output: [100 accC:privC to userD]
-validation scriptPubKey:
-    DELEGATION_SEPARATOR
-    DUP HASH160 <accountantC_pkh> EQUALVERIFY CHECKSIGVERIFY
-    DUP HASH160 <accountantD_pkh> EQUALVERIFY CHECKSIGVERIFY
+    input: 100 privD
+    output: [100 accC:privC to userD]
+    validation scriptPubKey:
+        DELEGATION_SEPARATOR
+        DUP HASH160 <accountantC_pkh> EQUALVERIFY CHECKSIGVERIFY
+        DUP HASH160 <accountantD_pkh> EQUALVERIFY CHECKSIGVERIFY
 #+END_SRC
 
    4 ) Public for private:
 
 #+BEGIN_SRC bitcoin
-input: 100 pubE
-output: [100 accD:privD to userE]
-validation scriptPubKey:
-    DUP HASH160 <accountantD_pkh> EQUALVERIFY CHECKSIGVERIFY
+    input: 100 pubE
+    output: [100 accD:privD to userE]
+    validation scriptPubKey:
+        DUP HASH160 <accountantD_pkh> EQUALVERIFY CHECKSIGVERIFY
 #+END_SRC
 
 The payer (userA) who wants to buy 50 pubE for 50 pubA builds the
 public transaction (pub_tx) using offers 1 and 4:
 
 #+BEGIN_SRC bitcoin
-input:  50 pubA
-output: 50 pubB to userC
-        50 pubE to userA
-expiry: 10000
+    input:  50 pubA
+    output: 50 pubB to userC
+            50 pubE to userA
+    expiry: 10000
 #+END_SRC
 
 Since 50 pubB from offer 1 are used to pay C, 50 pubA must go to
@@ -1243,8 +1243,8 @@ Two private transactions need to be created:
 Using offer 2, the payer also builds transaction priv_tx_1:
 
 #+BEGIN_SRC bitcoin
-input: -
-output: 50 privC to userD
+    input: -
+    output: 50 privC to userD
 #+END_SRC
 
 The validation scriptPubKey for 2 must be completed pushing 50 as the
@@ -1254,10 +1254,10 @@ and thus this whole transaction still depends on accC's signature.
 The other private transaction (priv_tx_2) is built using offer 3:
 
 #+BEGIN_SRC bitcoin
-input: -
-output: 50 privD to userE
-validation scriptPubKey:
-    0 50 0 userC 0 10000 pubB FRC_CHAIN_ID OUTPUT_EXISTS
+    input: -
+    output: 50 privD to userE
+    validation scriptPubKey:
+        0 50 0 userC 0 10000 pubB FRC_CHAIN_ID OUTPUT_EXISTS
 #+END_SRC
 
 Offer 3 doesn't require any completion for its validation
@@ -1286,10 +1286,6 @@ At any point, accC, accD or even userA right before the end could stop
 signing and forwarding the transactions, but that would only cause all
 transaction to expire.
 
-*** TODO Private Transitive transaction
-**** TODO Using blockchain commit method
-**** TODO Using registry commit method
-*** TODO Simplified cross-chain trade contract
 * Footnotes
 
 [fn:colored] Colored coins approach to custom assets in the chain is
