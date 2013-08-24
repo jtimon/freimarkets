@@ -953,23 +953,24 @@ The seller signs the following transaction tx1:
 script1:
 
 #+BEGIN_SRC bitcoin
+    DUP HASH160 <seller1 pkh> EQUALVERIFY CHECKSIGVERIFY
+    HASH160 <seller's secret hash> EQUALVERIFY
     IF ( BLOCK_HEIGHT < Exp )
         DUP HASH160 <buyer1 pkh> EQUALVERIFY CHECKSIGVERIFY
     ELSE
-        DUP HASH160 <seller1 pkh> EQUALVERIFY CHECKSIGVERIFY
-    AND
-        HASH160 <seller's secret hash> EQUALVERIFY
+        DUP HASH160 <seller2 pkh> EQUALVERIFY CHECKSIGVERIFY
 #+END_SRC
 
 option sub-transaction sub-tx1:
 
 #+BEGIN_SRC bitcoin
     input: script1
-    output: Q * X pubB to <seller1 pkh>
+    output: Q * X pubB to <seller3 pkh>
     granularity: N
     expiry: Exp
 #+END_SRC
 
+The seller signs sub-tx1 with seller1.
 The buyer only lacks the seller's secret to be able to exercise the
 sub-transaction. So he pays the premium conditionally to the secret
 being revelead before Exp2 with the following sub-transaction sub-tx2:
@@ -990,7 +991,7 @@ option transaction:
 #+BEGIN_SRC bitcoin
     sub-txs: <1, sub-tx2>
     input: -
-    output: P pubB to <seller2 pkh>
+    output: P pubB to <seller4 pkh>
     scriptValidSig: <seller's full secret>
 #+END_SRC
 
@@ -1004,7 +1005,9 @@ sub-transaction with:
     scriptValidSig: <buyer1 sig> <buyer1 pk> <seller's full secret>
 #+END_SRC
 
-The nQuantity n must be lower than the =nGranularity=.
+The =nQuantity= n must be lower than the =nGranularity= N.
+After Exp, the seller can double spend script1 by signing any valid
+transaction with seller1 and seller2.
 
 The seller in the long call example is taking the short call position.
 
