@@ -1,0 +1,9 @@
+Trustless exchanges: how it can be done *now*
+
+Users deposit external assets (e.g. national currency) into the system by means of a gateway. Cryptographic receipts and zero-knowledge proofs demonstrate solvency / non-fractional status of the gateway without revealing sensitive customer balances. Bearer tokens are provided in exchange which anyone can trade without trusting the gateway.
+
+Users deposit bitcoins and other crypto assets by means of a trustless gateway or two-way peg. At no point are keys to these coins held by anyone other than their owners, who are also free to move them back to the bitcoin block chain at any time.
+
+A series of hard-fork changes enable signing of bids, asks, and other smart contract types entirely without trust. Users exchange orders directly over a peer-to-peer network, and the miners combine these orders into matching trades which hit the block chain. We call this proposal "frei markets" - [i]frei[/i] meaning free as in freedom, liberté. It requires zero trust of any participant, and cannot be shut down.
+
+We have the capability to do this now. We have worked out the engineering designs, and we have the right people. We just need the ability to devote the 9 months or so of focused work on this.
