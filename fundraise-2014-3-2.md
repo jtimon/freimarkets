@@ -6,7 +6,7 @@ Users deposit external assets (e.g. national currency) into the system by means 
 
 Users deposit bitcoins and other crypto assets by means of a trustless gateway or two-way peg. At no point are keys to these coins held by anyone other than their owners, who are also free to move them back to their respective block chains at any time.
 
-A series of hard-fork changes on a side-chain enable signing of bids, asks, and other smart contract types entirely without trust. Users exchange orders directly over a peer-to-peer network, and the miners combine these orders into matching trades which hit the block chain without any counterparty risk. We call this proposal "frei markets" - [i]frei[/i] meaning free as in freedom, liberté. It requires zero trust of any participant, and cannot be shut down. You can read more about our proposal here:
+A series of hard-fork changes on a side-chain enable signing of bids, asks, and other smart contract types entirely without trust. Users exchange orders directly over a peer-to-peer network, and the miners combine these orders into matching trades which hit the block chain without any counterparty risk. We call this proposal "frei markets" - *frei* meaning free as in freedom, liberté. It requires zero trust of any participant, and cannot be shut down. You can read more about our proposal here:
 
 https://bitcointalk.org/index.php?topic=278671.0
 
