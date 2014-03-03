@@ -24,9 +24,11 @@ asks, and other smart contract types entirely without trust. Users
 exchange orders directly over a peer-to-peer network, and the miners
 combine these orders into matching trades which hit the block chain
 without any counterparty risk. We call this proposal "frei markets" -
-*frei* meaning free as in freedom, liberté. It requires zero trust of
-any participant, and cannot be shut down. You can read more about our
-proposal here:
+*frei* meaning free as in freedom, liberté. It is not specific to
+Freicoin, just free software code that could be deployed on any
+bitcoin-based chain (including Bitcoin itself). It requires zero trust
+of any participant, and cannot be shut down. You can read more about
+our proposal here:
 
 https://bitcointalk.org/index.php?topic=278671.0
 
